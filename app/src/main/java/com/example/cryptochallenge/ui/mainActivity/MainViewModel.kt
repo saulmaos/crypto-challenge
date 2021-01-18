@@ -24,12 +24,8 @@ class MainViewModel(
     val books: LiveData<Event<BooksResponse>> = Transformations.map(bitsoRepository.availableBooks) {
         _events.value = Event(MainNavigation.HideBooksListLoading)
         when(it) {
-            is BitsoRepository.NetworkResponse.Success<*> -> {
-                val data = it.data as List<*>
-                val books: List<Book> = data.map { entry ->
-                    entry as Book
-                }
-                Event(BooksResponse.BooksList(books))
+            is BitsoRepository.NetworkResponse.Success<List<Book>> -> {
+                Event(BooksResponse.BooksList(it.data))
             }
             is BitsoRepository.NetworkResponse.Error -> {
                 Event(BooksResponse.Error(it.errorId))

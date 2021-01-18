@@ -19,14 +19,14 @@ class BitsoRepository(
     private val networkService: NetworkService
 ) {
 
-    private val _availableBooks: MutableLiveData<NetworkResponse> = MutableLiveData()
-    val availableBooks: LiveData<NetworkResponse> = _availableBooks
+    private val _availableBooks: MutableLiveData<NetworkResponse<List<Book>>> = MutableLiveData()
+    val availableBooks: LiveData<NetworkResponse<List<Book>>> = _availableBooks
 
-    private val _ticker: MutableLiveData<NetworkResponse> = MutableLiveData()
-    val ticker: LiveData<NetworkResponse> = _ticker
+    private val _ticker: MutableLiveData<NetworkResponse<Ticker>> = MutableLiveData()
+    val ticker: LiveData<NetworkResponse<Ticker>> = _ticker
 
-    private val _orderBook: MutableLiveData<NetworkResponse> = MutableLiveData()
-    val orderBook: LiveData<NetworkResponse> = _orderBook
+    private val _orderBook: MutableLiveData<NetworkResponse<OrderBook>> = MutableLiveData()
+    val orderBook: LiveData<NetworkResponse<OrderBook>> = _orderBook
 
     fun requestAvailableBooks() {
         val call = networkService.doAvailableBooksCall()
@@ -88,7 +88,7 @@ class BitsoRepository(
                         return
                     }
                     _ticker.value = NetworkResponse.Success(
-                        response.body()?.payload?.let {
+                        response.body()?.payload!!.let {
                             Ticker(
                                 it.book,
                                 it.volume,
@@ -139,8 +139,8 @@ class BitsoRepository(
         )
     }
 
-    sealed class NetworkResponse {
-        data class Success<T>(val data: T) : NetworkResponse()
-        data class Error(@StringRes val errorId: Int) : NetworkResponse()
+    sealed class NetworkResponse<out T> {
+        data class Success<T>(val data: T) : NetworkResponse<T>()
+        data class Error(@StringRes val errorId: Int) : NetworkResponse<Nothing>()
     }
 }

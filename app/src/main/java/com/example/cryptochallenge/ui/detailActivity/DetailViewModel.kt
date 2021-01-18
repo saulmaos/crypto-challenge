@@ -26,8 +26,8 @@ class DetailViewModel(
             return@map Event(TickerResponse.TickerDefaultResult("N/A"))
         }
         when(it) {
-            is BitsoRepository.NetworkResponse.Success<*> -> {
-                Event(TickerResponse.TickerResult(it.data as Ticker))
+            is BitsoRepository.NetworkResponse.Success<Ticker> -> {
+                Event(TickerResponse.TickerResult(it.data))
             }
             is BitsoRepository.NetworkResponse.Error -> {
                 Event(TickerResponse.Error(it.errorId))
@@ -46,8 +46,8 @@ class DetailViewModel(
             ))
         }
         when(it) {
-            is BitsoRepository.NetworkResponse.Success<*> -> {
-                val orderBook = it.data as OrderBook
+            is BitsoRepository.NetworkResponse.Success<OrderBook> -> {
+                val orderBook = it.data
                 Event(OrderResponse.OrderResult(orderBook.asks[0]))
             }
             is BitsoRepository.NetworkResponse.Error -> {
