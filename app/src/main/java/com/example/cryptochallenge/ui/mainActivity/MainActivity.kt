@@ -4,27 +4,32 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cryptochallenge.CryptoApp
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.ui.detailActivity.DetailActivity
+import com.example.cryptochallenge.ui.detailActivity.DetailViewModel
 import com.example.cryptochallenge.ui.mainActivity.adapter.MainAdapter
 import com.example.cryptochallenge.utils.EventObserver
 import com.example.cryptochallenge.utils.ViewModelFactory
 import com.example.cryptochallenge.utils.showToast
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel by viewModels {
-        ViewModelFactory(MainViewModel::class) {
-            val repository = (application as CryptoApp).bitsoRepository
-            MainViewModel(repository)
-        }
-    }
+//    private val viewModel: MainViewModel by viewModels {
+//        ViewModelFactory(MainViewModel::class) {
+//            val repository = (application as CryptoApp).booksRepository
+//            return@ViewModelFactory MainViewModel(repository, CompositeDisposable())
+//        }
+//    }
+
+    private lateinit var viewModel: MainViewModel
 
     private lateinit var rvBooks: RecyclerView
     private val adapter: MainAdapter by lazy {
@@ -39,10 +44,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val repository = (application as CryptoApp).booksRepository
+//        val factory = ViewModelFactory(MainViewModel::class) {
+//            MainViewModel(repository, CompositeDisposable())
+//        }
+        val factory = object: ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return MainViewModel(repository, CompositeDisposable()) as T
+            }
+
+        }
+        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
+
         initRecycler()
 
         setObservers()
         setListener()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun setObservers() {
@@ -51,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 is MainViewModel.BooksResponse.BooksList -> {
                     rvBooks.visibility = View.VISIBLE
                     btnReload.visibility = View.GONE
-                    adapter.submitList(it.books)
+//                    adapter.submitList(it.books)
                 }
                 is MainViewModel.BooksResponse.Error -> {
                     rvBooks.visibility = View.GONE
@@ -75,6 +96,11 @@ class MainActivity : AppCompatActivity() {
                     progressBar.visibility = View.VISIBLE
                     btnReload.visibility = View.GONE
                     tvNoInternet.visibility = View.GONE
+                }
+                is MainViewModel.MainNavigation.BooksList -> {
+                    rvBooks.visibility = View.VISIBLE
+                    btnReload.visibility = View.GONE
+                    adapter.submitList(it.books)
                 }
             }
         })

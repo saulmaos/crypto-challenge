@@ -18,7 +18,7 @@ class DetailActivity : AppCompatActivity() {
 
     private val viewModel: DetailViewModel by viewModels {
         ViewModelFactory(DetailViewModel::class) {
-            val repository = (application as CryptoApp).bitsoRepository
+            val repository = (application as CryptoApp).coinDetailsRepository
             DetailViewModel(repository)
         }
     }
