@@ -29,7 +29,7 @@ fun ImageView.loadUrl(url: String) {
 }
 
 fun FragmentActivity.showToast(@StringRes msg: Int) {
-    Toast.makeText(this.applicationContext, msg, Toast.LENGTH_SHORT).show()
+    Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show()
 }
 
 fun View.showSnackBar(@StringRes msg: Int) {

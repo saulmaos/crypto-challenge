@@ -1,31 +1,35 @@
 package com.example.cryptochallenge.data.repository.dataSources
 
-import androidx.lifecycle.LiveData
-import com.example.cryptochallenge.data.local.entity.BookEntity
 import com.example.cryptochallenge.data.model.Book
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
-import com.example.cryptochallenge.data.repository.NetworkResponse
-import io.reactivex.Completable
-import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Single
 
 interface RemoteBooksDataSource {
     fun fetchAllBooks(): Single<List<Book>>
-    fun getAllBooks(): LiveData<NetworkResponse<List<Book>>>
 }
 
 interface LocalBooksDataSource {
-    fun getAllBooks(): Flowable<List<Book>>
-    fun insertBooks(books: List<BookEntity>): Single<Unit>
+    fun getAllBooks(): Maybe<List<Book>>
+    fun insertBooks(books: List<Book>): Single<Unit>
 }
 
 interface RemoteTickerDataSource {
-    fun fetchTicker(book: String)
-    fun getTicker(): LiveData<NetworkResponse<Ticker>>
+    fun fetchTicker(book: String): Single<Ticker>
 }
 
-interface RemoteOrderDataSource {
-    fun fetchOrderBooks(book: String)
-    fun getLastOrderBook(): LiveData<NetworkResponse<OrderBook>>
+interface LocalTickerDataSource {
+    fun getTicker(book: String): Single<Ticker>
+    fun insertTicker(ticker: Ticker): Single<Unit>
+}
+
+interface RemoteOrderBookDataSource {
+    fun fetchOrderBooks(book: String): Single<OrderBook>
+}
+
+interface LocalOrderBookDataSource {
+    fun getOrderBook(book: String): Single<OrderBook>
+    fun insertOrderBook(orderBook: OrderBook): Single<Unit>
+    fun deleteOrderBookByBook(book: String): Single<Unit>
 }

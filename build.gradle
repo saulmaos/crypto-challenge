@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.1"
+        classpath "com.android.tools.build:gradle:4.1.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -19,6 +19,100 @@ allprojects {
         google()
         jcenter()
     }
+}
+
+ext{
+    appCompatVersion = '1.2.0'
+    coreKTXVersion = '1.3.2'
+    materialVersion = '1.2.1'
+    constraintLayoutVersion = '2.0.4'
+    swipeRefreshLayoutVersion = '1.1.0'
+    fragmentKTXVersion = '1.2.5'
+    recyclerViewVersion = '1.1.0'
+    cardViewVersion = '1.0.0'
+    gsonVersion = '2.8.6'
+    retrofitVersion = '2.9.0'
+    okHttpVersion = '4.7.2'
+    lifecycleVersion = "2.2.0"
+    picassoVersion = "2.2.0"
+    roomVersion = "2.2.6"
+    rxAndroidVersion = "2.1.1"
+    rxJavaVersion = "2.2.19"
+    jUnitVersion = '4.13.1'
+    mockitoVersion = '3.3.3'
+    coreTestingVersion = '1.1.1'
+    liveDataTestingVersion = '1.1.2'
+    truthVersion = '1.1.2'
+    testRunnerVersion = "1.3.0"
+    testJUnitVersion = "1.1.2"
+    espressoVersion = "3.3.0"
+
+    //Views
+    appCompatLib = "androidx.appcompat:appcompat:$appCompatVersion"
+    constraintLayoutLib = "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    swipeRefreshLayoutLib = "androidx.swiperefreshlayout:swiperefreshlayout:$swipeRefreshLayoutVersion"
+    fragmentKTXLib = "androidx.fragment:fragment-ktx:$fragmentKTXVersion"
+    recyclerViewLib = "androidx.recyclerview:recyclerview:$recyclerViewVersion"
+    cardViewLib = "androidx.cardview:cardview:$cardViewVersion"
+
+    //Kotlin
+    kotlinLib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    //KTX
+    ktxLib = "androidx.core:core-ktx:$coreKTXVersion"
+
+    //Material
+    materialLib = "com.google.android.material:material:$materialVersion"
+
+    //Gson
+    gsonLib = "com.google.code.gson:gson:$gsonVersion"
+
+    //Retrofit
+    retrofitLib = "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    retrofitGsonLib = "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    retrofitRxJavaLib = "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+
+    //OkHttp
+    okHttpLib = "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    okHttpInterceptorLib = "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+
+    // ViewModel
+    viewModelLib = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+
+    // LiveData
+    liveDataLib = "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
+    liveDataTestingLib = "com.jraska.livedata:testing-ktx:$liveDataTestingVersion"
+
+    // Picasso
+    picassoLib = "com.squareup.picasso:picasso:$picassoVersion"
+
+    // Room
+    roomLib = "androidx.room:room-runtime:$roomVersion"
+    roomCompiler = "androidx.room:room-compiler:$roomVersion"
+    roomRxJavaLib = "androidx.room:room-rxjava2:$roomVersion"
+
+    //Rx
+    rxAndroidLib = "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+    rxJavaLib = "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+
+    // JUnit
+    jUnitLib = "junit:junit:$jUnitVersion"
+    testJUnitLib = "androidx.test.ext:junit:$testJUnitVersion"
+
+    // Mockito
+    mockitoLib = "org.mockito:mockito-core:$mockitoVersion"
+
+    // Core Testing
+    coreTestingLib = "android.arch.core:core-testing:$coreTestingVersion"
+
+    // Truth
+    truthLib = "com.google.truth:truth:$truthVersion"
+
+    // Test runner
+    testRunnerLib = "androidx.test:runner:$testRunnerVersion"
+
+    // Espresso
+    espressoLib = "androidx.test.espresso:espresso-core:$espressoVersion"
 }
 
 task clean(type: Delete) {

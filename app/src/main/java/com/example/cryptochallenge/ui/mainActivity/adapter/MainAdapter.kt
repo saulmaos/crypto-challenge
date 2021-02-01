@@ -5,11 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.cryptochallenge.R
 import com.example.cryptochallenge.data.model.Book
+import com.example.cryptochallenge.databinding.ViewHolderBookBinding
 import com.example.cryptochallenge.utils.loadUrl
-import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.view_holder_book.view.*
 
 class MainAdapter(
     private val listener: (book: Book) -> Unit
@@ -23,16 +21,20 @@ class MainAdapter(
     }
 }
 
-class MainViewHolder(
-    parent: ViewGroup,
-    private val listener: (book: Book) -> Unit
+class MainViewHolder private constructor(
+    private val listener: (book: Book) -> Unit,
+    private val binding: ViewHolderBookBinding
 ) : RecyclerView.ViewHolder(
-    LayoutInflater.from(parent.context).inflate(R.layout.view_holder_book, parent, false)
+    binding.root
 ) {
+    constructor(parent: ViewGroup, listener: (book: Book) -> Unit): this(
+        listener, ViewHolderBookBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    )
+
     fun bind(book: Book) {
-        itemView.tvBook.text = book.bookPretty
-        itemView.ivLogo.loadUrl(book.imageUrl)
-        itemView.setOnClickListener { listener(book) }
+        binding.tvBook.text = book.bookPretty
+        binding.ivLogo.loadUrl(book.imageUrl)
+        binding.root.setOnClickListener { listener(book) }
     }
 }
 

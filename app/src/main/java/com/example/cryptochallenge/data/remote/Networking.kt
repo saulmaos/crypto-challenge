@@ -21,6 +21,7 @@ object Networking {
                             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
                             else HttpLoggingInterceptor.Level.NONE
                         })
+                    .addInterceptor(UserAgentInterceptor())
                     .readTimeout(NETWORK_CALL_TIMEOUT.toLong(), TimeUnit.SECONDS)
                     .writeTimeout(NETWORK_CALL_TIMEOUT.toLong(), TimeUnit.SECONDS)
                     .build()

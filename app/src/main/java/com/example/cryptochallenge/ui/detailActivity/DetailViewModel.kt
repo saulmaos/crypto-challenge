@@ -1,108 +1,166 @@
 package com.example.cryptochallenge.ui.detailActivity
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.example.cryptochallenge.R
-import com.example.cryptochallenge.data.model.Order
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
-import com.example.cryptochallenge.data.repository.BooksRepository
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
-import com.example.cryptochallenge.data.repository.NetworkResponse
 import com.example.cryptochallenge.utils.Event
+import com.example.cryptochallenge.utils.connectivity.NetworkHelper
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 
 class DetailViewModel(
-    private val coinDetailsRepository: CoinDetailsRepository
+    private val coinDetailsRepository: CoinDetailsRepository,
+    private val networkHelper: NetworkHelper,
+    private val compositeDisposable: CompositeDisposable
 ) : ViewModel() {
+    private var tickerRequestFinished = false
+    private var orderBookRequestFinished = false
 
-    init {
-        Log.d("sdfsd", "fsdfsdf")
-    }
-
-    private var isConnected: Boolean = false
     private val _events = MutableLiveData<Event<DetailNavigation>>()
     val events: LiveData<Event<DetailNavigation>> = _events
 
-    val ticker: LiveData<Event<TickerResponse>> = Transformations.map(coinDetailsRepository.ticker) {
-        _events.value = Event(DetailNavigation.HideLoading)
-        if (!isConnected) {
-            return@map Event(TickerResponse.TickerDefaultResult("N/A"))
-        }
-        when(it) {
-            is NetworkResponse.Success<Ticker> -> {
-                Event(TickerResponse.TickerResult(it.data))
-            }
-            is NetworkResponse.Error -> {
-                Event(TickerResponse.Error(it.errorId))
-            }
-        }
-    }
+    private val _pair = MutableLiveData<Pair<String, String>>()
+    val pair: LiveData<Pair<String, String>> = _pair
 
-    private val _pair = MutableLiveData<String>()
-    val pair: LiveData<String> = _pair
+    fun onInitialRequest(book: String?) {
+        networkHelper.observable()
+            .subscribe(
+                { requestData(it, book) },
+                { it.printStackTrace() }
+            ).let { compositeDisposable.add(it) }
 
-    val lastOrder: LiveData<Event<OrderResponse>> = Transformations.map(coinDetailsRepository.orderBook) {
-        _events.value = Event(DetailNavigation.HideLoading)
-        if (!isConnected) {
-            return@map Event(OrderResponse.OrderResult(
-                Order("N/A", "N/A", "N/A")
-            ))
-        }
-        when(it) {
-            is NetworkResponse.Success<OrderBook> -> {
-                val orderBook = it.data
-                Event(OrderResponse.OrderResult(orderBook.asks[0]))
-            }
-            is NetworkResponse.Error -> {
-                Event(OrderResponse.Error(it.errorId))
+        book?.let {
+            val params = it.split("_")
+            _pair.value = Pair(params[0], params[1])
+            if (!networkHelper.isNetworkConnected()) {
+                _events.value = Event(DetailNavigation.ShowLoading)
+                requestLocalTicker(it)
+                requestLocalOrderBook(it)
             }
         }
-    }
-
-    fun onInternetChange(isConnected: Boolean, book: String?) {
-        this.isConnected = isConnected
-        requestData(isConnected, book)
     }
 
     fun onReloadPressed(book: String?) {
-        requestData(isConnected, book)
+        requestData(networkHelper.isNetworkConnected(), book)
     }
 
     private fun requestData(isConnected: Boolean, book: String?) {
+        tickerRequestFinished = false
+        orderBookRequestFinished = false
         if (isConnected) {
             book?.let {
-                _pair.value = it.replace("_", "/")
                 _events.value = Event(DetailNavigation.ShowLoading)
-                coinDetailsRepository.requestTicker(book)
-                coinDetailsRepository.requestLastOrder(book)
+                requestRemoteTicker(it)
+                requestRemoteOrderBook(it)
             }
         } else {
-            _events.value = Event(DetailNavigation.NoInternet(R.string.error_no_internet))
+            _events.value = Event(DetailNavigation.Error(R.string.error_no_internet))
         }
+    }
+
+    private fun requestRemoteOrderBook(book: String) {
+        coinDetailsRepository.requestOrderBook(book)
+            .flatMap { orderBook ->
+                coinDetailsRepository.deleteOrderBook(book).map { orderBook }
+            }
+            .flatMap { orderBook ->
+                coinDetailsRepository.saveOrderBook(orderBook)
+                    .map { orderBook }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    _events.value = Event(DetailNavigation.OrderBookResult(it))
+                    orderBookRequestFinished = true
+                    if (tickerRequestFinished && orderBookRequestFinished)
+                        _events.value = Event(DetailNavigation.HideLoading)
+                },
+                {
+                    it.printStackTrace()
+                    requestLocalOrderBook(book)
+                }
+            ).let { compositeDisposable.add(it) }
+    }
+
+    private fun requestRemoteTicker(book: String) {
+        coinDetailsRepository.requestTicker(book)
+            .flatMap { ticker ->
+                coinDetailsRepository.saveTicker(ticker).map { ticker }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    _events.value = Event(DetailNavigation.TickerResult(it))
+                    tickerRequestFinished = true
+                    if (tickerRequestFinished && orderBookRequestFinished)
+                        _events.value = Event(DetailNavigation.HideLoading)
+                },
+                {
+                    it.printStackTrace()
+                    requestLocalTicker(book)
+                }
+            ).let { compositeDisposable.add(it) }
+    }
+
+    private fun requestLocalOrderBook(book: String) {
+        coinDetailsRepository.getLocalOrderBook(book)
+            .observeOn(AndroidSchedulers.mainThread())
+            .doFinally {
+                orderBookRequestFinished = true
+                if (tickerRequestFinished && orderBookRequestFinished)
+                    _events.value = Event(DetailNavigation.HideLoading)
+            }
+            .subscribe(
+                {
+                    if (it.asks.isEmpty()) _events.value =
+                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+                    else _events.value = Event(DetailNavigation.OrderBookResult(it))
+                },
+                {
+                    _events.value =
+                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+                }
+            ).let { compositeDisposable.add(it) }
+    }
+
+    private fun requestLocalTicker(book: String) {
+        coinDetailsRepository.getLocalTicker(book)
+            .observeOn(AndroidSchedulers.mainThread())
+            .doFinally {
+                tickerRequestFinished = true
+                if (tickerRequestFinished && orderBookRequestFinished)
+                    _events.value = Event(DetailNavigation.HideLoading)
+            }
+            .subscribe(
+                {
+                    _events.value = Event(DetailNavigation.TickerResult(it))
+                },
+                {
+                    it.printStackTrace()
+                    _events.value = Event(
+                        DetailNavigation.TickerResult(Ticker.defaultTicker())
+                    )
+                    _events.value =
+                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+                }
+            ).let { compositeDisposable.add(it) }
     }
 
     override fun onCleared() {
         super.onCleared()
+        compositeDisposable.clear()
     }
 
     sealed class DetailNavigation {
-        data class NoInternet(@StringRes val errorId: Int) : DetailNavigation()
+        data class Error(@StringRes val errorId: Int) : DetailNavigation()
+        data class TickerResult(val ticker: Ticker) : DetailNavigation()
+        data class OrderBookResult(val orderBook: OrderBook) : DetailNavigation()
         object HideLoading : DetailNavigation()
         object ShowLoading : DetailNavigation()
-    }
-
-    sealed class OrderResponse {
-        data class OrderResult(val order: Order): OrderResponse()
-        data class Error(@StringRes val errorId: Int): OrderResponse()
-    }
-
-    sealed class TickerResponse {
-        data class TickerResult(val ticker: Ticker): TickerResponse()
-        data class TickerDefaultResult(val default: String): TickerResponse()
-        data class Error(@StringRes val errorId: Int): TickerResponse()
     }
 }

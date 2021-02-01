@@ -7,7 +7,8 @@ import com.example.cryptochallenge.data.remote.Networking
 import com.example.cryptochallenge.data.repository.BooksRepository
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
 import com.example.cryptochallenge.data.repository.dataSources.*
-import com.example.cryptochallenge.utils.connectivity.ConnectivityLiveData
+import com.example.cryptochallenge.utils.connectivity.NetworkHelper
+import com.example.cryptochallenge.utils.connectivity.NetworkHelperImpl
 
 class CryptoApp : Application() {
 
@@ -15,35 +16,69 @@ class CryptoApp : Application() {
         Networking.create(BuildConfig.BASE_URL)
     }
 
-    private val booksRetrofitDataSource: RemoteBooksDataSource by lazy {
-        BooksRetrofitDataSource(networkService)
+    private fun getCryptoNetworkService(): NetworkService {
+        return fakeNetworkService
+            ?: networkService
     }
 
-    private val tickerRetrofitDataSource: RemoteTickerDataSource by lazy {
-        TickerRetrofitDataSource(networkService)
+    fun getNetworkHelper(): NetworkHelper {
+        return fakeNetworkHelper?.let { return it }
+            ?: networkHelperImpl
     }
 
-    private val orderRetrofitDataSource: RemoteOrderDataSource by lazy {
-        OrderRetrofitDataSource(networkService)
+    private val networkHelperImpl: NetworkHelper by lazy {
+        NetworkHelperImpl(this)
     }
 
-    val coinDetailsRepository: CoinDetailsRepository by lazy {
-        CoinDetailsRepository(tickerRetrofitDataSource, orderRetrofitDataSource)
+    private fun getBooksRetrofitDataSource(): RemoteBooksDataSource {
+        return BooksRetrofitDataSource(getCryptoNetworkService())
+    }
+
+    private fun getTickerRetrofitDataSource(): RemoteTickerDataSource {
+        return TickerRetrofitDataSource(getCryptoNetworkService())
+    }
+
+    private fun getOrderBookRetrofitDataSource(): RemoteOrderBookDataSource {
+        return OrderBookRetrofitDataSource(getCryptoNetworkService())
+    }
+
+    private fun getBooksRoomDataSource(): LocalBooksDataSource {
+        return BooksRoomDataSource(getCryptoDatabase().bookDao())
+    }
+
+    private fun getTickerRoomDataSource(): LocalTickerDataSource {
+        return TickerRoomDataSource(getCryptoDatabase().tickerDao())
+    }
+
+    private fun getOrderBookRoomDataSource(): LocalOrderBookDataSource {
+        return OrderBookRoomDataSource(getCryptoDatabase().orderBookDao())
+    }
+
+    fun getCoinDetailsRepository(): CoinDetailsRepository {
+        return CoinDetailsRepository(
+            getTickerRetrofitDataSource(),
+            getOrderBookRetrofitDataSource(),
+            getTickerRoomDataSource(),
+            getOrderBookRoomDataSource()
+        )
     }
 
     private val database: CryptoDatabase by lazy {
         CryptoDatabase.getDatabase(applicationContext)
     }
 
-    private val booksRoomDataSource: LocalBooksDataSource by lazy {
-        BooksRoomDataSource(database.bookDao())
+    private fun getCryptoDatabase(): CryptoDatabase {
+        return fakeDatabase?.let { return it }
+            ?: database
     }
 
-    val booksRepository: BooksRepository by lazy {
-        BooksRepository(booksRetrofitDataSource, booksRoomDataSource)
+    fun getBooksRepository(): BooksRepository {
+        return BooksRepository(getBooksRetrofitDataSource(), getBooksRoomDataSource())
     }
 
-    val connectivityLiveData: ConnectivityLiveData by lazy {
-        ConnectivityLiveData(this)
-    }
+    var fakeNetworkHelper: NetworkHelper? = null
+
+    var fakeDatabase: CryptoDatabase? = null
+
+    var fakeNetworkService: NetworkService? = null
 }

@@ -6,10 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "books")
 data class BookEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    var id: Int = 0,
-
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "book")
     val book: String
 )

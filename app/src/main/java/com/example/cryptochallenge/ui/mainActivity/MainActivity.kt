@@ -1,37 +1,30 @@
 package com.example.cryptochallenge.ui.mainActivity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.cryptochallenge.CryptoApp
-import com.example.cryptochallenge.R
+import com.example.cryptochallenge.databinding.ActivityMainBinding
 import com.example.cryptochallenge.ui.detailActivity.DetailActivity
-import com.example.cryptochallenge.ui.detailActivity.DetailViewModel
 import com.example.cryptochallenge.ui.mainActivity.adapter.MainAdapter
 import com.example.cryptochallenge.utils.EventObserver
 import com.example.cryptochallenge.utils.ViewModelFactory
 import com.example.cryptochallenge.utils.showToast
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-//    private val viewModel: MainViewModel by viewModels {
-//        ViewModelFactory(MainViewModel::class) {
-//            val repository = (application as CryptoApp).booksRepository
-//            return@ViewModelFactory MainViewModel(repository, CompositeDisposable())
-//        }
-//    }
+    private val viewModel: MainViewModel by viewModels {
+        ViewModelFactory(MainViewModel::class) {
+            val repository = (application as CryptoApp).getBooksRepository()
+            val network = (application as CryptoApp).getNetworkHelper()
+            return@ViewModelFactory MainViewModel(repository, network, CompositeDisposable())
+        }
+    }
 
-    private lateinit var viewModel: MainViewModel
-
-    private lateinit var rvBooks: RecyclerView
     private val adapter: MainAdapter by lazy {
         MainAdapter{
             val intent = Intent(this, DetailActivity::class.java)
@@ -40,85 +33,56 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val repository = (application as CryptoApp).booksRepository
-//        val factory = ViewModelFactory(MainViewModel::class) {
-//            MainViewModel(repository, CompositeDisposable())
-//        }
-        val factory = object: ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return MainViewModel(repository, CompositeDisposable()) as T
-            }
-
-        }
-        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initRecycler()
 
         setObservers()
-        setListener()
+        setListeners()
+
+        initRequest()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun initRequest() {
+        viewModel.onInitialRequest()
     }
 
     private fun setObservers() {
-        viewModel.books.observe(this, EventObserver{
-            when(it) {
-                is MainViewModel.BooksResponse.BooksList -> {
-                    rvBooks.visibility = View.VISIBLE
-                    btnReload.visibility = View.GONE
-//                    adapter.submitList(it.books)
-                }
-                is MainViewModel.BooksResponse.Error -> {
-                    rvBooks.visibility = View.GONE
-                    btnReload.visibility = View.VISIBLE
-                    showToast(it.errorId)
-                }
-            }
-
-        })
         viewModel.events.observe(this, EventObserver{
             when(it) {
-                is MainViewModel.MainNavigation.NoInternet -> {
-                    btnReload.visibility = View.GONE
+                is MainViewModel.MainNavigation.Error -> {
                     showToast(it.errorId)
                 }
                 MainViewModel.MainNavigation.HideBooksListLoading -> {
-                    progressBar.visibility = View.GONE
-                    tvNoInternet.visibility = View.GONE
+                    binding.srlCoins.isRefreshing = false
                 }
                 MainViewModel.MainNavigation.ShowBooksListLoading -> {
-                    progressBar.visibility = View.VISIBLE
-                    btnReload.visibility = View.GONE
-                    tvNoInternet.visibility = View.GONE
+                    if (!binding.srlCoins.isRefreshing) binding.srlCoins.isRefreshing = true
+                    binding.tvNoInternet.visibility = View.GONE
                 }
                 is MainViewModel.MainNavigation.BooksList -> {
-                    rvBooks.visibility = View.VISIBLE
-                    btnReload.visibility = View.GONE
                     adapter.submitList(it.books)
+                }
+                MainViewModel.MainNavigation.NoDataFound -> {
+                    binding.tvNoInternet.visibility = View.VISIBLE
                 }
             }
         })
-        val connectivityLiveData = (application as CryptoApp).connectivityLiveData
-        connectivityLiveData.observe(this, {
-            viewModel.onInternetChange(it)
-        })
     }
 
-    private fun setListener() {
-        btnReload.setOnClickListener {
-            viewModel.onReloadPressed()
+    private fun setListeners() {
+        binding.srlCoins.setOnRefreshListener {
+            viewModel.onReload()
         }
     }
 
     private fun initRecycler() {
-        rvBooks = findViewById(R.id.rvBooks)
-        rvBooks.layoutManager = LinearLayoutManager(this)
-        rvBooks.adapter = adapter
+        binding.rvBooks.layoutManager = LinearLayoutManager(this)
+        binding.rvBooks.adapter = adapter
     }
 }
