@@ -25,8 +25,7 @@ class BookRepositoryTest {
     private lateinit var booksRepository: BooksRepository
 
     private val book: Book by lazy {
-        Book("btc_mxn", "1", "2", "100000"
-            , "20000", "10500", "19500", "url")
+        Book("btc_mxn", "1", "2", "100000", "20000", "10500", "19500", "url")
     }
 
     @Before

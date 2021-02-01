@@ -5,7 +5,10 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.swipeDown
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayingAtLeast
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.cryptochallenge.DependenciesTestRule
 import com.example.cryptochallenge.R
@@ -101,7 +104,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun givenValidInternet_whenOnSwipeRefresh_shouldShowData(){
+    fun givenValidInternet_whenOnSwipeRefresh_shouldShowData() {
         FakeNetworkConfig.isThereInternet = true
         FakeNetworkConfig.emitValue = true
         val books = listOf(book, book.copy(book = "eth_mxn"))
@@ -112,7 +115,11 @@ class MainActivityTest {
         onView(withId(R.id.rvBooks))
             .check(matches(RecyclerViewMatcher.hasItemCount(books.size)))
 
-        val newBooks = listOf(book, book.copy(book = "eth_mxn"), book.copy(book = "xrp_mxn", bookPretty = "xrp/mxn"))
+        val newBooks = listOf(
+            book,
+            book.copy(book = "eth_mxn"),
+            book.copy(book = "xrp_mxn", bookPretty = "xrp/mxn")
+        )
         FakeNetworkServiceConfig.setBooks(newBooks)
 
         onView(withId(R.id.srlCoins))
@@ -149,7 +156,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun givenNoInternetAndValidInternetRestored_shouldShowData(){
+    fun givenNoInternetAndValidInternetRestored_shouldShowData() {
         FakeNetworkConfig.isThereInternet = false
         FakeNetworkConfig.emitValue = false
         val books = listOf(book, book.copy(book = "eth_mxn"))
@@ -170,7 +177,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun givenValidInternetAndInternetLost_shouldShowNoInternetToast(){
+    fun givenValidInternetAndInternetLost_shouldShowNoInternetToast() {
         FakeNetworkConfig.isThereInternet = true
         FakeNetworkConfig.emitValue = true
         val books = listOf(book, book.copy(book = "eth_mxn"))
@@ -196,5 +203,4 @@ class MainActivityTest {
 
         testScheduler.triggerActions()
     }
-
 }

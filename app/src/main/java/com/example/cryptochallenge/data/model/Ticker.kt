@@ -1,6 +1,6 @@
 package com.example.cryptochallenge.data.model
 
-import java.util.*
+import java.util.Locale
 
 data class Ticker(
     var book: String,

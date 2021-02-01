@@ -6,7 +6,18 @@ import com.example.cryptochallenge.data.remote.NetworkService
 import com.example.cryptochallenge.data.remote.Networking
 import com.example.cryptochallenge.data.repository.BooksRepository
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
-import com.example.cryptochallenge.data.repository.dataSources.*
+import com.example.cryptochallenge.data.repository.dataSources.BooksRetrofitDataSource
+import com.example.cryptochallenge.data.repository.dataSources.BooksRoomDataSource
+import com.example.cryptochallenge.data.repository.dataSources.LocalBooksDataSource
+import com.example.cryptochallenge.data.repository.dataSources.LocalOrderBookDataSource
+import com.example.cryptochallenge.data.repository.dataSources.LocalTickerDataSource
+import com.example.cryptochallenge.data.repository.dataSources.OrderBookRetrofitDataSource
+import com.example.cryptochallenge.data.repository.dataSources.OrderBookRoomDataSource
+import com.example.cryptochallenge.data.repository.dataSources.RemoteBooksDataSource
+import com.example.cryptochallenge.data.repository.dataSources.RemoteOrderBookDataSource
+import com.example.cryptochallenge.data.repository.dataSources.RemoteTickerDataSource
+import com.example.cryptochallenge.data.repository.dataSources.TickerRetrofitDataSource
+import com.example.cryptochallenge.data.repository.dataSources.TickerRoomDataSource
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.example.cryptochallenge.utils.connectivity.NetworkHelperImpl
 

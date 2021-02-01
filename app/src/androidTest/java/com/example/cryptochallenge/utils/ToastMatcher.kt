@@ -6,7 +6,6 @@ import androidx.test.espresso.Root
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
-
 class ToastMatcher : TypeSafeMatcher<Root?>() {
 
     override fun describeTo(description: Description?) {
@@ -24,5 +23,4 @@ class ToastMatcher : TypeSafeMatcher<Root?>() {
         }
         return false
     }
-
 }

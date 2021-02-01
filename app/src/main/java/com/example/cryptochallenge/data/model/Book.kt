@@ -17,5 +17,5 @@ data class Book(
 
     var imageUrl: String,
 
-    var bookPretty: String = book.replace("_","/")
+    var bookPretty: String = book.replace("_", "/")
 )

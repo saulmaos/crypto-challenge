@@ -15,7 +15,7 @@ import com.example.cryptochallenge.utils.toPayloadOrderBookResponse
 import com.example.cryptochallenge.utils.toPayloadTickerResponse
 import io.reactivex.Single
 
-class FakeNetworkService: NetworkService {
+class FakeNetworkService : NetworkService {
     override fun doAvailableBooksCall(): Single<BaseResponse<List<PayloadAvailableBookResponse>>> {
         return Single.just(booksResponse)
     }
@@ -35,7 +35,8 @@ object FakeNetworkServiceConfig {
     var orderBookResponse: BaseResponse<PayloadOrderBookResponse>? = null
 
     fun setBooks(books: List<Book>) {
-        val payloadList: List<PayloadAvailableBookResponse> = books.toPayloadAvailableBookResponseList()
+        val payloadList: List<PayloadAvailableBookResponse> =
+            books.toPayloadAvailableBookResponseList()
         booksResponse = BaseResponse(true, payload = payloadList)
     }
 

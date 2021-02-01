@@ -41,5 +41,4 @@ class OrderDiffCallback : DiffUtil.ItemCallback<Order>() {
     override fun areContentsTheSame(oldItem: Order, newItem: Order): Boolean {
         return oldItem == newItem
     }
-
 }

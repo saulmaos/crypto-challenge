@@ -5,7 +5,9 @@ import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.cryptochallenge.DependenciesTestRule
 import com.example.cryptochallenge.R
@@ -46,7 +48,6 @@ class DetailActivityTest {
     fun givenNoInternetAndNoLocalData_shouldShowNoInternetMsg() {
         FakeNetworkConfig.isThereInternet = false
         FakeNetworkConfig.emitValue = false
-
 
         launch<DetailActivity>(getIntent())
 
@@ -220,7 +221,7 @@ class DetailActivityTest {
     }
 
     @Test
-    fun givenValidInternetAndInternetLost_shouldShowNoInternetSnackBar(){
+    fun givenValidInternetAndInternetLost_shouldShowNoInternetSnackBar() {
         FakeNetworkConfig.isThereInternet = true
         FakeNetworkConfig.emitValue = true
         FakeNetworkServiceConfig.setTicker(ticker)

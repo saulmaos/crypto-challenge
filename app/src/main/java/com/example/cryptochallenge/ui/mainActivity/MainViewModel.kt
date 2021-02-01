@@ -98,7 +98,7 @@ class MainViewModel(
     sealed class MainNavigation {
         data class BooksList(val books: List<Book>) : MainNavigation()
         data class Error(@StringRes val errorId: Int) : MainNavigation()
-        object NoDataFound: MainNavigation()
+        object NoDataFound : MainNavigation()
         object HideBooksListLoading : MainNavigation()
         object ShowBooksListLoading : MainNavigation()
     }

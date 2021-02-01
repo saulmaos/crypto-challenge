@@ -18,5 +18,4 @@ interface NetworkService {
 
     @GET(ORDER_BOOK)
     fun doOrderBookCall(@Query("book") book: String): Single<BaseResponse<PayloadOrderBookResponse>>
-
 }

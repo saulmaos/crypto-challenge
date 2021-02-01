@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val adapter: MainAdapter by lazy {
-        MainAdapter{
+        MainAdapter {
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra(MainViewModel.INTENT_BOOK, it.book)
             startActivity(intent)
@@ -53,26 +53,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setObservers() {
-        viewModel.events.observe(this, EventObserver{
-            when(it) {
-                is MainViewModel.MainNavigation.Error -> {
-                    showToast(it.errorId)
-                }
-                MainViewModel.MainNavigation.HideBooksListLoading -> {
-                    binding.srlCoins.isRefreshing = false
-                }
-                MainViewModel.MainNavigation.ShowBooksListLoading -> {
-                    if (!binding.srlCoins.isRefreshing) binding.srlCoins.isRefreshing = true
-                    binding.tvNoInternet.visibility = View.GONE
-                }
-                is MainViewModel.MainNavigation.BooksList -> {
-                    adapter.submitList(it.books)
-                }
-                MainViewModel.MainNavigation.NoDataFound -> {
-                    binding.tvNoInternet.visibility = View.VISIBLE
+        viewModel.events.observe(
+            this,
+            EventObserver {
+                when (it) {
+                    is MainViewModel.MainNavigation.Error -> {
+                        showToast(it.errorId)
+                    }
+                    MainViewModel.MainNavigation.HideBooksListLoading -> {
+                        binding.srlCoins.isRefreshing = false
+                    }
+                    MainViewModel.MainNavigation.ShowBooksListLoading -> {
+                        if (!binding.srlCoins.isRefreshing) binding.srlCoins.isRefreshing = true
+                        binding.tvNoInternet.visibility = View.GONE
+                    }
+                    is MainViewModel.MainNavigation.BooksList -> {
+                        adapter.submitList(it.books)
+                    }
+                    MainViewModel.MainNavigation.NoDataFound -> {
+                        binding.tvNoInternet.visibility = View.VISIBLE
+                    }
                 }
             }
-        })
+        )
     }
 
     private fun setListeners() {

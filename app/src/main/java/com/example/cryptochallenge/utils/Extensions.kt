@@ -37,8 +37,10 @@ fun View.showSnackBar(@StringRes msg: Int) {
 }
 
 fun List<BookEntity>.toBookList(): List<Book> = map {
-    Book(it.book, "", "", "",
-        "", "", "", CryptoIcons.createUrl(it.book))
+    Book(
+        it.book, "", "", "",
+        "", "", "", CryptoIcons.createUrl(it.book)
+    )
 }
 
 fun List<Book>.toBookEntityList(): List<BookEntity> = map {
@@ -60,14 +62,16 @@ fun List<OrderEntity>.toOrderList(): List<Order> = map {
 }
 
 fun PayloadAvailableBookResponse.toBook() =
-    Book(book,
+    Book(
+        book,
         minimumAmount,
         maximumAmount,
         minimumPrice,
         maximumPrice,
         minimumValue,
         maximumValue,
-        CryptoIcons.createUrl(book))
+        CryptoIcons.createUrl(book)
+    )
 
 fun PayloadTickerResponse.toTicker() =
     Ticker(

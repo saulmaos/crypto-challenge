@@ -12,7 +12,7 @@ import com.example.cryptochallenge.data.local.entity.OrderEntity
 import com.example.cryptochallenge.data.local.entity.TickerEntity
 
 @Database(entities = [BookEntity::class, TickerEntity::class, OrderEntity::class], version = 1, exportSchema = true)
-abstract class CryptoDatabase: RoomDatabase() {
+abstract class CryptoDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
     abstract fun tickerDao(): TickerDao
     abstract fun orderBookDao(): OrderBookDao

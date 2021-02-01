@@ -68,41 +68,47 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setObservers() {
-        viewModel.events.observe(this, EventObserver {
-            when(it) {
-                is DetailViewModel.DetailNavigation.Error -> {
-                    binding.clDetail.showSnackBar(it.errorId)
-                }
-                DetailViewModel.DetailNavigation.HideLoading -> {
-                    binding.progressBar.visibility = View.GONE
-                }
-                DetailViewModel.DetailNavigation.ShowLoading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is DetailViewModel.DetailNavigation.TickerResult -> {
-                    binding.tvLastPriceVal.text = it.ticker.last
-                    binding.tvCurrency.text = it.ticker.currency
-                    binding.tvAskVal.text = it.ticker.ask
-                    binding.tvBidVal.text = it.ticker.bid
-                    binding.tvLastUpdate.text = getString(R.string.last_update, it.ticker.createdAt)
-                    binding.tvHighVal.text = it.ticker.high
-                    binding.tvLowVal.text = it.ticker.low
-                    binding.tvVolumeVal.text = it.ticker.volume
-                }
-                is DetailViewModel.DetailNavigation.OrderBookResult -> {
-                    bidsAdapter.submitList(it.orderBook.bids)
-                    asksAdapter.submitList(it.orderBook.asks)
+        viewModel.events.observe(
+            this,
+            EventObserver {
+                when (it) {
+                    is DetailViewModel.DetailNavigation.Error -> {
+                        binding.clDetail.showSnackBar(it.errorId)
+                    }
+                    DetailViewModel.DetailNavigation.HideLoading -> {
+                        binding.progressBar.visibility = View.GONE
+                    }
+                    DetailViewModel.DetailNavigation.ShowLoading -> {
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
+                    is DetailViewModel.DetailNavigation.TickerResult -> {
+                        binding.tvLastPriceVal.text = it.ticker.last
+                        binding.tvCurrency.text = it.ticker.currency
+                        binding.tvAskVal.text = it.ticker.ask
+                        binding.tvBidVal.text = it.ticker.bid
+                        binding.tvLastUpdate.text = getString(R.string.last_update, it.ticker.createdAt)
+                        binding.tvHighVal.text = it.ticker.high
+                        binding.tvLowVal.text = it.ticker.low
+                        binding.tvVolumeVal.text = it.ticker.volume
+                    }
+                    is DetailViewModel.DetailNavigation.OrderBookResult -> {
+                        bidsAdapter.submitList(it.orderBook.bids)
+                        asksAdapter.submitList(it.orderBook.asks)
+                    }
                 }
             }
-        })
-        viewModel.pair.observe(this, {
-            val ticker = it.first
-            val currency = it.second
-            title = getString(R.string.pair, ticker, currency)
-            binding.tvPriceBid.text = getString(R.string.price_order, currency)
-            binding.tvPriceAsk.text = getString(R.string.price_order, currency)
-            binding.tvAmountBid.text = getString(R.string.amount_order, ticker)
-            binding.tvAmountAsk.text = getString(R.string.amount_order, ticker)
-        })
+        )
+        viewModel.pair.observe(
+            this,
+            {
+                val ticker = it.first
+                val currency = it.second
+                title = getString(R.string.pair, ticker, currency)
+                binding.tvPriceBid.text = getString(R.string.price_order, currency)
+                binding.tvPriceAsk.text = getString(R.string.price_order, currency)
+                binding.tvAmountBid.text = getString(R.string.amount_order, ticker)
+                binding.tvAmountAsk.text = getString(R.string.amount_order, ticker)
+            }
+        )
     }
 }

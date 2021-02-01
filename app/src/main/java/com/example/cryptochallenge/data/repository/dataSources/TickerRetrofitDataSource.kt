@@ -8,7 +8,7 @@ import io.reactivex.schedulers.Schedulers
 
 class TickerRetrofitDataSource(
     private val networkService: NetworkService
-): RemoteTickerDataSource {
+) : RemoteTickerDataSource {
 
     override fun fetchTicker(book: String): Single<Ticker> {
         return networkService.doTickerCall(book)

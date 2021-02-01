@@ -5,7 +5,6 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import org.hamcrest.Matcher
 
-
 object SwipeRefreshUtils {
     fun withCustomConstraints(action: ViewAction, constraints: Matcher<View>): ViewAction {
         return object : ViewAction {
@@ -22,5 +21,4 @@ object SwipeRefreshUtils {
             }
         }
     }
-
 }

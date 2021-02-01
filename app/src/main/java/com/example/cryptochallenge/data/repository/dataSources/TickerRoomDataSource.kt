@@ -10,7 +10,7 @@ import io.reactivex.schedulers.Schedulers
 
 class TickerRoomDataSource(
     private val tickerDao: TickerDao
-): LocalTickerDataSource {
+) : LocalTickerDataSource {
     override fun getTicker(book: String): Single<Ticker> {
         return tickerDao.getTicker(book)
             .map(TickerEntity::toTicker)

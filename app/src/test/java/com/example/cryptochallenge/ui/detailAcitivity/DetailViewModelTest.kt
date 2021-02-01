@@ -422,7 +422,6 @@ class DetailViewModelTest {
         `when`(coinDetailsRepository.getLocalTicker(book))
             .thenReturn(Single.just(ticker))
 
-
         `when`(coinDetailsRepository.requestOrderBook(book))
             .thenReturn(Single.error(orderBookError))
         `when`(coinDetailsRepository.getLocalOrderBook(book))

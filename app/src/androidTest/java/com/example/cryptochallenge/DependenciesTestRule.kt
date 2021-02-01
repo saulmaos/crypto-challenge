@@ -9,7 +9,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-class DependenciesTestRule(private val context: Context): TestRule {
+class DependenciesTestRule(private val context: Context) : TestRule {
 
     override fun apply(base: Statement, description: Description?): Statement {
         return object : Statement() {
@@ -18,7 +18,6 @@ class DependenciesTestRule(private val context: Context): TestRule {
                 base.evaluate()
             }
         }
-
     }
 
     private fun setupDependencies() {
@@ -30,7 +29,8 @@ class DependenciesTestRule(private val context: Context): TestRule {
 
     val database: CryptoDatabase by lazy {
         Room.inMemoryDatabaseBuilder(
-            context.applicationContext, CryptoDatabase::class.java)
+            context.applicationContext, CryptoDatabase::class.java
+        )
             .allowMainThreadQueries()
             .build()
     }

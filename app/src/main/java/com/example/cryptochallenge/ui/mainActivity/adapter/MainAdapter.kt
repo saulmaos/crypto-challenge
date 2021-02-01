@@ -27,7 +27,7 @@ class MainViewHolder private constructor(
 ) : RecyclerView.ViewHolder(
     binding.root
 ) {
-    constructor(parent: ViewGroup, listener: (book: Book) -> Unit): this(
+    constructor(parent: ViewGroup, listener: (book: Book) -> Unit) : this(
         listener, ViewHolderBookBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     )
 

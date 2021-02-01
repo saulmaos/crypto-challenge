@@ -49,7 +49,6 @@ object FakeNetworkConfig {
     fun emitInternetConnectionLost() {
         internetEmitter?.onChange(false)
     }
-
 }
 
 interface InternetEmitter {

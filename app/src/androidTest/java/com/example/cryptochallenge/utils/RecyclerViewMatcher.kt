@@ -18,7 +18,8 @@ class RecyclerViewMatcher(val recyclerViewId: Int = 0) {
 
         fun hasItemCount(itemCount: Int): Matcher<View> {
             return object : BoundedMatcher<View, RecyclerView>(
-                RecyclerView::class.java) {
+                RecyclerView::class.java
+            ) {
 
                 override fun describeTo(description: Description) {
                     description.appendText("has $itemCount items")
@@ -46,7 +47,10 @@ class RecyclerViewMatcher(val recyclerViewId: Int = 0) {
                     idDescription = try {
                         resources!!.getResourceName(recyclerViewId)
                     } catch (var4: Resources.NotFoundException) {
-                        String.format("%s (resource name not found)", (Integer.valueOf(recyclerViewId)))
+                        String.format(
+                            "%s (resource name not found)",
+                            (Integer.valueOf(recyclerViewId))
+                        )
                     }
                 }
                 description!!.appendText("with id: $idDescription")

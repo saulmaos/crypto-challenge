@@ -8,7 +8,7 @@ import io.reactivex.schedulers.Schedulers
 
 class OrderBookRetrofitDataSource(
     private val networkService: NetworkService
-): RemoteOrderBookDataSource {
+) : RemoteOrderBookDataSource {
     override fun fetchOrderBooks(book: String): Single<OrderBook> {
         return networkService.doOrderBookCall(book)
             .map { it.payload.toOrderBook() }

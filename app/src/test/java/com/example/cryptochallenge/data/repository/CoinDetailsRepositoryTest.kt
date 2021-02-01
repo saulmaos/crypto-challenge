@@ -12,7 +12,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
@@ -46,7 +47,12 @@ class CoinDetailsRepositoryTest {
 
     @Before
     fun setup() {
-        coinDetailsRepository = CoinDetailsRepository(remoteTickerDataSource, remoteOrderBookDataSource, localTickerDataSource, localOrderBookDataSource)
+        coinDetailsRepository = CoinDetailsRepository(
+            remoteTickerDataSource,
+            remoteOrderBookDataSource,
+            localTickerDataSource,
+            localOrderBookDataSource
+        )
     }
 
     @Test
@@ -55,7 +61,6 @@ class CoinDetailsRepositoryTest {
             .thenReturn(Single.just(ticker))
 
         coinDetailsRepository.requestTicker(book)
-
 
         verify(remoteTickerDataSource).fetchTicker(book)
     }
@@ -67,7 +72,6 @@ class CoinDetailsRepositoryTest {
 
         coinDetailsRepository.getLocalTicker(book)
 
-
         verify(localTickerDataSource).getTicker(book)
     }
 
@@ -77,7 +81,6 @@ class CoinDetailsRepositoryTest {
             .thenReturn(Single.just(Unit))
 
         coinDetailsRepository.saveTicker(ticker)
-
 
         verify(localTickerDataSource).insertTicker(ticker)
     }
@@ -89,7 +92,6 @@ class CoinDetailsRepositoryTest {
 
         coinDetailsRepository.requestOrderBook(book)
 
-
         verify(remoteOrderBookDataSource).fetchOrderBooks(book)
     }
 
@@ -99,7 +101,6 @@ class CoinDetailsRepositoryTest {
             .thenReturn(Single.just(orderBook))
 
         coinDetailsRepository.getLocalOrderBook(book)
-
 
         verify(localOrderBookDataSource).getOrderBook(book)
     }
@@ -111,7 +112,6 @@ class CoinDetailsRepositoryTest {
 
         coinDetailsRepository.saveOrderBook(orderBook)
 
-
         verify(localOrderBookDataSource).insertOrderBook(orderBook)
     }
 
@@ -121,7 +121,6 @@ class CoinDetailsRepositoryTest {
             .thenReturn(Single.just(Unit))
 
         coinDetailsRepository.deleteOrderBook(book)
-
 
         verify(localOrderBookDataSource).deleteOrderBookByBook(book)
     }
