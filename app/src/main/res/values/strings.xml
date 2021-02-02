@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Crypto Challenge</string>
+    <string name="last_price">Last price</string>
+    <string name="last_order">Last order</string>
+    <string name="price">Price</string>
+    <string name="amount">Amount</string>
+    <string name="error_no_internet">No internet connection detected</string>
+    <string name="error_on_request">An error occurred. Try again later</string>
+    <string name="error_on_request_book">Couldn\'t retrieve last order</string>
+    <string name="error_on_request_ticker">Couldn\'t retrieve last price</string>
+    <string name="reload">Reload</string>
+    <string name="coin_and_currency_format">%s %s</string>
+</resources>
