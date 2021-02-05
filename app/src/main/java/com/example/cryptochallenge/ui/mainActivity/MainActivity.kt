@@ -1,98 +1,91 @@
 package com.example.cryptochallenge.ui.mainActivity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.cryptochallenge.CryptoApp
-import com.example.cryptochallenge.R
+import com.example.cryptochallenge.databinding.ActivityMainBinding
 import com.example.cryptochallenge.ui.detailActivity.DetailActivity
 import com.example.cryptochallenge.ui.mainActivity.adapter.MainAdapter
 import com.example.cryptochallenge.utils.EventObserver
 import com.example.cryptochallenge.utils.ViewModelFactory
 import com.example.cryptochallenge.utils.showToast
-import kotlinx.android.synthetic.main.activity_main.*
+import io.reactivex.disposables.CompositeDisposable
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels {
         ViewModelFactory(MainViewModel::class) {
-            val repository = (application as CryptoApp).bitsoRepository
-            MainViewModel(repository)
+            val repository = (application as CryptoApp).getBooksRepository()
+            val network = (application as CryptoApp).getNetworkHelper()
+            return@ViewModelFactory MainViewModel(repository, network, CompositeDisposable())
         }
     }
 
-    private lateinit var rvBooks: RecyclerView
     private val adapter: MainAdapter by lazy {
-        MainAdapter{
+        MainAdapter {
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra(MainViewModel.INTENT_BOOK, it.book)
             startActivity(intent)
         }
     }
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initRecycler()
 
         setObservers()
-        setListener()
+        setListeners()
+
+        initRequest()
+    }
+
+    private fun initRequest() {
+        viewModel.onInitialRequest()
     }
 
     private fun setObservers() {
-        viewModel.books.observe(this, EventObserver{
-            when(it) {
-                is MainViewModel.BooksResponse.BooksList -> {
-                    rvBooks.visibility = View.VISIBLE
-                    btnReload.visibility = View.GONE
-                    adapter.submitList(it.books)
-                }
-                is MainViewModel.BooksResponse.Error -> {
-                    rvBooks.visibility = View.GONE
-                    btnReload.visibility = View.VISIBLE
-                    showToast(it.errorId)
-                }
-            }
-
-        })
-        viewModel.events.observe(this, EventObserver{
-            when(it) {
-                is MainViewModel.MainNavigation.NoInternet -> {
-                    btnReload.visibility = View.GONE
-                    showToast(it.errorId)
-                }
-                MainViewModel.MainNavigation.HideBooksListLoading -> {
-                    progressBar.visibility = View.GONE
-                    tvNoInternet.visibility = View.GONE
-                }
-                MainViewModel.MainNavigation.ShowBooksListLoading -> {
-                    progressBar.visibility = View.VISIBLE
-                    btnReload.visibility = View.GONE
-                    tvNoInternet.visibility = View.GONE
+        viewModel.events.observe(
+            this,
+            EventObserver {
+                when (it) {
+                    is MainViewModel.MainNavigation.Error -> {
+                        showToast(it.errorId)
+                    }
+                    MainViewModel.MainNavigation.HideBooksListLoading -> {
+                        binding.srlCoins.isRefreshing = false
+                    }
+                    MainViewModel.MainNavigation.ShowBooksListLoading -> {
+                        if (!binding.srlCoins.isRefreshing) binding.srlCoins.isRefreshing = true
+                        binding.tvNoInternet.visibility = View.GONE
+                    }
+                    is MainViewModel.MainNavigation.BooksList -> {
+                        adapter.submitList(it.books)
+                    }
+                    MainViewModel.MainNavigation.NoDataFound -> {
+                        binding.tvNoInternet.visibility = View.VISIBLE
+                    }
                 }
             }
-        })
-        val connectivityLiveData = (application as CryptoApp).connectivityLiveData
-        connectivityLiveData.observe(this, {
-            viewModel.onInternetChange(it)
-        })
+        )
     }
 
-    private fun setListener() {
-        btnReload.setOnClickListener {
-            viewModel.onReloadPressed()
+    private fun setListeners() {
+        binding.srlCoins.setOnRefreshListener {
+            viewModel.onReload()
         }
     }
 
     private fun initRecycler() {
-        rvBooks = findViewById(R.id.rvBooks)
-        rvBooks.layoutManager = LinearLayoutManager(this)
-        rvBooks.adapter = adapter
+        binding.rvBooks.layoutManager = LinearLayoutManager(this)
+        binding.rvBooks.adapter = adapter
     }
 }

@@ -1,6 +1,6 @@
 package com.example.cryptochallenge.data.model
 
-import java.util.*
+import java.util.Locale
 
 data class Ticker(
     var book: String,
@@ -22,4 +22,20 @@ data class Ticker(
     var createdAt: String,
 
     val currency: String = book.substring(book.indexOf("_") + 1).toUpperCase(Locale.ROOT)
-)
+) {
+    companion object {
+        fun defaultTicker() =
+            Ticker(
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "",
+            )
+    }
+}
