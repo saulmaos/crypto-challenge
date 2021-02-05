@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.cryptochallenge.ui.mainFragment.MainFragment"
-        android:label="fragment_main"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_main" >
         <action
             android:id="@+id/action_mainFragment_to_detailFragment"
@@ -16,7 +16,11 @@
     </fragment>
     <fragment
         android:id="@+id/detailFragment"
-        android:name="com.example.cryptochallenge.ui.detailActivity.DetailFragment"
+        android:name="com.example.cryptochallenge.ui.detailFragment.DetailFragment"
         android:label="fragment_detail"
-        tools:layout="@layout/fragment_detail" />
+        tools:layout="@layout/fragment_detail" >
+        <argument
+            android:name="intent_book"
+            app:argType="string" />
+    </fragment>
 </navigation>

@@ -1,4 +1,4 @@
-package com.example.cryptochallenge.ui.mainActivity
+package com.example.cryptochallenge.ui.mainFragment
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
@@ -26,6 +26,7 @@ class MainViewModel(
     val events: LiveData<Event<MainNavigation>> = _events
 
     fun onInitialRequest() {
+        if (events.value != null) return
         networkHelper.observable()
             .subscribe(
                 { internetChange(it) },

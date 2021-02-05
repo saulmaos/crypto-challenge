@@ -1,26 +1,31 @@
-package com.example.cryptochallenge.ui.detailActivity
+package com.example.cryptochallenge.ui.detailFragment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.viewModels
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.cryptochallenge.CryptoApp
 import com.example.cryptochallenge.R
-import com.example.cryptochallenge.databinding.ActivityDetailBinding
-import com.example.cryptochallenge.ui.detailActivity.adapter.OrderBookAdapter
-import com.example.cryptochallenge.ui.mainActivity.MainViewModel
+import com.example.cryptochallenge.databinding.FragmentDetailBinding
+import com.example.cryptochallenge.ui.detailFragment.adapter.OrderBookAdapter
 import com.example.cryptochallenge.utils.EventObserver
 import com.example.cryptochallenge.utils.ViewModelFactory
 import com.example.cryptochallenge.utils.showSnackBar
 import io.reactivex.disposables.CompositeDisposable
 
-class DetailActivity : AppCompatActivity() {
+class DetailFragment : Fragment() {
+
+    private lateinit var binding: FragmentDetailBinding
 
     private val viewModel: DetailViewModel by viewModels {
         ViewModelFactory(DetailViewModel::class) {
-            val repository = (application as CryptoApp).getCoinDetailsRepository()
-            val networkHelper = (application as CryptoApp).getNetworkHelper()
+            val repository = (requireActivity().application as CryptoApp).getCoinDetailsRepository()
+            val networkHelper = (requireActivity().application as CryptoApp).getNetworkHelper()
             DetailViewModel(repository, networkHelper, CompositeDisposable())
         }
     }
@@ -31,12 +36,19 @@ class DetailActivity : AppCompatActivity() {
     private val asksAdapter: OrderBookAdapter by lazy {
         OrderBookAdapter()
     }
-    private lateinit var binding: ActivityDetailBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        binding = FragmentDetailBinding.inflate(LayoutInflater.from(context), container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         initRecycler()
         initRequest()
@@ -45,7 +57,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun initRequest() {
-        val book: String? = intent.getStringExtra(MainViewModel.INTENT_BOOK)
+        val book: String = navArgs<DetailFragmentArgs>().value.intentBook
         viewModel.onInitialRequest(book)
     }
 
@@ -62,14 +74,14 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setListeners() {
         binding.btnReload.setOnClickListener {
-            val book: String? = intent.getStringExtra(MainViewModel.INTENT_BOOK)
+            val book: String = navArgs<DetailFragmentArgs>().value.intentBook
             viewModel.onReloadPressed(book)
         }
     }
 
     private fun setObservers() {
         viewModel.events.observe(
-            this,
+            viewLifecycleOwner,
             EventObserver {
                 when (it) {
                     is DetailViewModel.DetailNavigation.Error -> {
@@ -99,11 +111,11 @@ class DetailActivity : AppCompatActivity() {
             }
         )
         viewModel.pair.observe(
-            this,
+            viewLifecycleOwner,
             {
                 val ticker = it.first
                 val currency = it.second
-                title = getString(R.string.pair, ticker, currency)
+                (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.pair, ticker, currency)
                 binding.tvPriceBid.text = getString(R.string.price_order, currency)
                 binding.tvPriceAsk.text = getString(R.string.price_order, currency)
                 binding.tvAmountBid.text = getString(R.string.amount_order, ticker)

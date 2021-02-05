@@ -1,4 +1,4 @@
-package com.example.cryptochallenge.ui.detailActivity
+package com.example.cryptochallenge.ui.detailFragment
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
@@ -30,6 +30,7 @@ class DetailViewModel(
     val pair: LiveData<Pair<String, String>> = _pair
 
     fun onInitialRequest(book: String?) {
+        if (pair.value != null) return
         networkHelper.observable()
             .subscribe(
                 { requestData(it, book) },
