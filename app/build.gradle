@@ -60,6 +60,8 @@ dependencies {
     implementation recyclerViewLib
     implementation swipeRefreshLayoutLib
     implementation fragmentKTXLib
+    implementation navigationFragmentLib
+    implementation navigationUILib
 
     //Material
     implementation materialLib
@@ -83,12 +85,17 @@ dependencies {
 
     // Room
     implementation roomLib
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     kapt roomCompiler
     implementation roomRxJavaLib
 
     // RxJava
     implementation rxAndroidLib
     implementation rxJavaLib
+
+    // Coroutines
+    implementation coroutinesLib
+    implementation coroutinesAndroidLib
 
     // Testing
     testImplementation jUnitLib

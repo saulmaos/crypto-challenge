@@ -14,11 +14,11 @@ class CoinDetailsRepository(
     private val localTickerDataSource: LocalTickerDataSource,
     private val localOrderBookDataSource: LocalOrderBookDataSource
 ) {
-    fun requestTicker(book: String): Single<Ticker> {
+    suspend fun requestTicker(book: String): Ticker {
         return remoteTickerDataSource.fetchTicker(book)
     }
 
-    fun requestOrderBook(book: String): Single<OrderBook> {
+    suspend fun requestOrderBook(book: String): OrderBook {
         return remoteOrderBookDataSource.fetchOrderBooks(book)
     }
 
@@ -26,15 +26,15 @@ class CoinDetailsRepository(
         return localTickerDataSource.getTicker(book)
     }
 
-    fun saveTicker(ticker: Ticker): Single<Unit> {
-        return localTickerDataSource.insertTicker(ticker)
+    suspend fun saveTicker(ticker: Ticker) {
+        localTickerDataSource.insertTicker(ticker)
     }
 
-    fun saveOrderBook(orderBook: OrderBook): Single<Unit> {
+    suspend fun saveOrderBook(orderBook: OrderBook) {
         return localOrderBookDataSource.insertOrderBook(orderBook)
     }
 
-    fun deleteOrderBook(book: String): Single<Unit> {
+    suspend fun deleteOrderBook(book: String) {
         return localOrderBookDataSource.deleteOrderBookByBook(book)
     }
 

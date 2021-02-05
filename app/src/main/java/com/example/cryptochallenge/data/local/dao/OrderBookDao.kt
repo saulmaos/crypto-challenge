@@ -10,10 +10,10 @@ import io.reactivex.Single
 @Dao
 interface OrderBookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertMany(orderBids: List<OrderEntity>, orderAsks: List<OrderEntity>): Single<Unit>
+    suspend fun insertMany(orderBids: List<OrderEntity>, orderAsks: List<OrderEntity>)
 
     @Query("DELETE FROM `order` WHERE book = :book")
-    fun deleteOrdersByBook(book: String): Single<Unit>
+    suspend fun deleteOrdersByBook(book: String)
 
     @Query("SELECT * FROM `order` WHERE book = :book AND order_type = :orderType")
     fun getOrderByBookAndType(book: String, orderType: String): Single<List<OrderEntity>>

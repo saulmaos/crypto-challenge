@@ -17,8 +17,7 @@ class TickerRoomDataSource(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun insertTicker(ticker: Ticker): Single<Unit> {
-        return tickerDao.insert(ticker.toTickerEntity())
-            .subscribeOn(Schedulers.io())
+    override suspend fun insertTicker(ticker: Ticker){
+        tickerDao.insert(ticker.toTickerEntity())
     }
 }

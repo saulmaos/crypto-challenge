@@ -22,17 +22,16 @@ class OrderBookRoomDataSource(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun insertOrderBook(
+    override suspend fun insertOrderBook(
         orderBook: OrderBook
-    ): Single<Unit> {
-        return orderBookDao.insertMany(
+    ) {
+        orderBookDao.insertMany(
             orderBook.bids.toOrderEntityList(OrderType.BIDS),
             orderBook.asks.toOrderEntityList(OrderType.ASKS)
-        ).subscribeOn(Schedulers.io())
+        )
     }
 
-    override fun deleteOrderBookByBook(book: String): Single<Unit> {
-        return orderBookDao.deleteOrdersByBook(book)
-            .subscribeOn(Schedulers.io())
+    override suspend fun deleteOrderBookByBook(book: String) {
+        orderBookDao.deleteOrdersByBook(book)
     }
 }

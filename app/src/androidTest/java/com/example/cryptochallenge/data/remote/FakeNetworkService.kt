@@ -20,8 +20,8 @@ class FakeNetworkService : NetworkService {
         return Single.just(booksResponse)
     }
 
-    override fun doTickerCall(book: String): Single<BaseResponse<PayloadTickerResponse>> {
-        return Single.just(tickerResponse)
+    override suspend fun doTickerCall(book: String): BaseResponse<PayloadTickerResponse> {
+        return tickerResponse!!
     }
 
     override fun doOrderBookCall(book: String): Single<BaseResponse<PayloadOrderBookResponse>> {

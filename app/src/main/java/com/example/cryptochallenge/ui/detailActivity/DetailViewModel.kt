@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
@@ -12,6 +13,7 @@ import com.example.cryptochallenge.utils.Event
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.launch
 
 class DetailViewModel(
     private val coinDetailsRepository: CoinDetailsRepository,
@@ -63,48 +65,34 @@ class DetailViewModel(
         }
     }
 
-    private fun requestRemoteOrderBook(book: String) {
-        coinDetailsRepository.requestOrderBook(book)
-            .flatMap { orderBook ->
-                coinDetailsRepository.deleteOrderBook(book).map { orderBook }
-            }
-            .flatMap { orderBook ->
-                coinDetailsRepository.saveOrderBook(orderBook)
-                    .map { orderBook }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    _events.value = Event(DetailNavigation.OrderBookResult(it))
-                    orderBookRequestFinished = true
-                    if (tickerRequestFinished && orderBookRequestFinished)
-                        _events.value = Event(DetailNavigation.HideLoading)
-                },
-                {
-                    it.printStackTrace()
-                    requestLocalOrderBook(book)
-                }
-            ).let { compositeDisposable.add(it) }
+    private fun requestRemoteOrderBook(book: String) = viewModelScope.launch {
+        try {
+            val orderBook = coinDetailsRepository.requestOrderBook(book)
+            coinDetailsRepository.deleteOrderBook(book)
+            coinDetailsRepository.saveOrderBook(orderBook)
+
+            _events.value = Event(DetailNavigation.OrderBookResult(orderBook))
+            orderBookRequestFinished = true
+            if (tickerRequestFinished && orderBookRequestFinished)
+                _events.value = Event(DetailNavigation.HideLoading)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            requestLocalOrderBook(book)
+        }
     }
 
-    private fun requestRemoteTicker(book: String) {
-        coinDetailsRepository.requestTicker(book)
-            .flatMap { ticker ->
-                coinDetailsRepository.saveTicker(ticker).map { ticker }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    _events.value = Event(DetailNavigation.TickerResult(it))
-                    tickerRequestFinished = true
-                    if (tickerRequestFinished && orderBookRequestFinished)
-                        _events.value = Event(DetailNavigation.HideLoading)
-                },
-                {
-                    it.printStackTrace()
-                    requestLocalTicker(book)
-                }
-            ).let { compositeDisposable.add(it) }
+    private fun requestRemoteTicker(book: String) = viewModelScope.launch {
+        try {
+            val ticker: Ticker = coinDetailsRepository.requestTicker(book)
+            coinDetailsRepository.saveTicker(ticker)
+            _events.value = Event(DetailNavigation.TickerResult(ticker))
+            tickerRequestFinished = true
+            if (tickerRequestFinished && orderBookRequestFinished)
+                _events.value = Event(DetailNavigation.HideLoading)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            requestLocalTicker(book)
+        }
     }
 
     private fun requestLocalOrderBook(book: String) {
