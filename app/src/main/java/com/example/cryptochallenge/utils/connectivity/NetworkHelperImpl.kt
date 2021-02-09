@@ -10,10 +10,16 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
+/*
+* Used to be notified when there is a change on the internet connection
+*/
 class NetworkHelperImpl @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) : NetworkHelper {
-
+    /*
+    * Used to emit events about the internet connection using the NetworkCallback but
+    * this callback does not work when there's no internet and the user opens the app
+    */
     private val observable: Observable<Boolean>
 
     init {
@@ -40,6 +46,9 @@ class NetworkHelperImpl @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
     }
 
+    /*
+    * Used to check manually if there is a network available
+    */
     override fun isNetworkConnected(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val nw = connectivityManager.activeNetwork ?: return false

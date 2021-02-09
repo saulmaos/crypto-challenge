@@ -8,7 +8,7 @@ import io.reactivex.disposables.CompositeDisposable
 
 @InstallIn(ActivityComponent::class)
 @Module
-class MainViewModelModule {
+class RXModule {
 
     @Provides
     fun provideCompositeDisposable(): CompositeDisposable =

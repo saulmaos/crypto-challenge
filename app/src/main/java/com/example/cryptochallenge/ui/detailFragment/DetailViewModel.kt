@@ -30,6 +30,12 @@ class DetailViewModel @ViewModelInject constructor(
     private val _pair = MutableLiveData<Pair<String, String>>()
     val pair: LiveData<Pair<String, String>> = _pair
 
+    /*
+    * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
+    * `if (events.value != null)` is used to avoid calling it when config changes occur
+    * It's necessary to check manually for the internet connection status as explained
+    * in NetworkHelperImpl
+    */
     fun onInitialRequest(book: String?) {
         if (pair.value != null) return
         networkHelper.observable()
@@ -67,6 +73,10 @@ class DetailViewModel @ViewModelInject constructor(
         }
     }
 
+    /*
+    * Last previous orderBook is deleted before the new one is saved. This is to ensure that
+    * only the latest orders are saved
+    */
     private fun requestRemoteOrderBook(book: String) = viewModelScope.launch {
         try {
             val orderBook = coinDetailsRepository.requestOrderBook(book)

@@ -26,6 +26,12 @@ class MainViewModel @ViewModelInject constructor(
     private val _events = MutableLiveData<Event<MainNavigation>>()
     val events: LiveData<Event<MainNavigation>> = _events
 
+    /*
+    * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
+    * `if (events.value != null)` is used to avoid calling it when config changes occur
+    * It's necessary to check manually for the internet connection status as explained
+    * in NetworkHelperImpl
+    */
     fun onInitialRequest() {
         if (events.value != null) return
         networkHelper.observable()
