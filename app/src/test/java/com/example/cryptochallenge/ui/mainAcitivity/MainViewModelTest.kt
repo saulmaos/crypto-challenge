@@ -5,7 +5,7 @@ import com.example.cryptochallenge.R
 import com.example.cryptochallenge.RxSchedulerRule
 import com.example.cryptochallenge.data.model.Book
 import com.example.cryptochallenge.data.repository.BooksRepository
-import com.example.cryptochallenge.ui.mainActivity.MainViewModel
+import com.example.cryptochallenge.ui.mainFragment.MainViewModel
 import com.example.cryptochallenge.utils.Event
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.google.common.truth.Truth.assertThat

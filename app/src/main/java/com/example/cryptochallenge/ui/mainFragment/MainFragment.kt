@@ -8,25 +8,27 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.cryptochallenge.CryptoApp
+import com.example.cryptochallenge.data.repository.BooksRepository
 import com.example.cryptochallenge.databinding.FragmentMainBinding
 import com.example.cryptochallenge.ui.mainFragment.adapter.MainAdapter
 import com.example.cryptochallenge.utils.EventObserver
-import com.example.cryptochallenge.utils.ViewModelFactory
+import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.example.cryptochallenge.utils.showToast
-import io.reactivex.disposables.CompositeDisposable
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainFragment : Fragment() {
 
     private lateinit var binding: FragmentMainBinding
 
-    private val viewModel: MainViewModel by viewModels {
-        ViewModelFactory(MainViewModel::class) {
-            val repository = (requireActivity().application as CryptoApp).getBooksRepository()
-            val network = (requireActivity().application as CryptoApp).getNetworkHelper()
-            return@ViewModelFactory MainViewModel(repository, network, CompositeDisposable())
-        }
-    }
+    @Inject
+    lateinit var booksRepository: BooksRepository
+
+    @Inject
+    lateinit var networkHelper: NetworkHelper
+
+    private val viewModel by viewModels<MainViewModel>()
 
     private val booksAdapter: MainAdapter by lazy {
         MainAdapter {

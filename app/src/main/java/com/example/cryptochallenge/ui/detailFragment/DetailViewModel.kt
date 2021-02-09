@@ -1,6 +1,7 @@
 package com.example.cryptochallenge.ui.detailFragment
 
 import androidx.annotation.StringRes
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,7 +16,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.launch
 
-class DetailViewModel(
+class DetailViewModel @ViewModelInject constructor(
     private val coinDetailsRepository: CoinDetailsRepository,
     private val networkHelper: NetworkHelper,
     private val compositeDisposable: CompositeDisposable

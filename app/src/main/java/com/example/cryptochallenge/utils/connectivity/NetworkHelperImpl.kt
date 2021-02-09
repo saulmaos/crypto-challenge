@@ -1,7 +1,5 @@
 package com.example.cryptochallenge.utils.connectivity
 
-import android.app.Application
-import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -10,13 +8,11 @@ import android.os.Build
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class NetworkHelperImpl(
+class NetworkHelperImpl @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) : NetworkHelper {
-    constructor(application: Application) : this(
-        application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    )
 
     private val observable: Observable<Boolean>
 

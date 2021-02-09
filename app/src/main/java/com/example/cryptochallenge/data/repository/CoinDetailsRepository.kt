@@ -7,8 +7,9 @@ import com.example.cryptochallenge.data.repository.dataSources.LocalTickerDataSo
 import com.example.cryptochallenge.data.repository.dataSources.RemoteOrderBookDataSource
 import com.example.cryptochallenge.data.repository.dataSources.RemoteTickerDataSource
 import io.reactivex.Single
+import javax.inject.Inject
 
-class CoinDetailsRepository(
+class CoinDetailsRepository @Inject constructor(
     private val remoteTickerDataSource: RemoteTickerDataSource,
     private val remoteOrderBookDataSource: RemoteOrderBookDataSource,
     private val localTickerDataSource: LocalTickerDataSource,

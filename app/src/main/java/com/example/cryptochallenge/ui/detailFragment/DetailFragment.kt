@@ -9,26 +9,28 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.cryptochallenge.CryptoApp
 import com.example.cryptochallenge.R
+import com.example.cryptochallenge.data.repository.CoinDetailsRepository
 import com.example.cryptochallenge.databinding.FragmentDetailBinding
 import com.example.cryptochallenge.ui.detailFragment.adapter.OrderBookAdapter
 import com.example.cryptochallenge.utils.EventObserver
-import com.example.cryptochallenge.utils.ViewModelFactory
+import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.example.cryptochallenge.utils.showSnackBar
-import io.reactivex.disposables.CompositeDisposable
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class DetailFragment : Fragment() {
 
     private lateinit var binding: FragmentDetailBinding
 
-    private val viewModel: DetailViewModel by viewModels {
-        ViewModelFactory(DetailViewModel::class) {
-            val repository = (requireActivity().application as CryptoApp).getCoinDetailsRepository()
-            val networkHelper = (requireActivity().application as CryptoApp).getNetworkHelper()
-            DetailViewModel(repository, networkHelper, CompositeDisposable())
-        }
-    }
+    @Inject
+    lateinit var coinDetailsRepository: CoinDetailsRepository
+
+    @Inject
+    lateinit var networkHelper: NetworkHelper
+
+    private val viewModel: DetailViewModel by viewModels()
 
     private val bidsAdapter: OrderBookAdapter by lazy {
         OrderBookAdapter()
@@ -98,7 +100,8 @@ class DetailFragment : Fragment() {
                         binding.tvCurrency.text = it.ticker.currency
                         binding.tvAskVal.text = it.ticker.ask
                         binding.tvBidVal.text = it.ticker.bid
-                        binding.tvLastUpdate.text = getString(R.string.last_update, it.ticker.createdAt)
+                        binding.tvLastUpdate.text =
+                            getString(R.string.last_update, it.ticker.createdAt)
                         binding.tvHighVal.text = it.ticker.high
                         binding.tvLowVal.text = it.ticker.low
                         binding.tvVolumeVal.text = it.ticker.volume
@@ -115,7 +118,8 @@ class DetailFragment : Fragment() {
             {
                 val ticker = it.first
                 val currency = it.second
-                (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.pair, ticker, currency)
+                (activity as AppCompatActivity).supportActionBar?.title =
+                    getString(R.string.pair, ticker, currency)
                 binding.tvPriceBid.text = getString(R.string.price_order, currency)
                 binding.tvPriceAsk.text = getString(R.string.price_order, currency)
                 binding.tvAmountBid.text = getString(R.string.amount_order, ticker)

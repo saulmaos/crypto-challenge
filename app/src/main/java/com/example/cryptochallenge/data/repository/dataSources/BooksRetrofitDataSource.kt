@@ -6,10 +6,11 @@ import com.example.cryptochallenge.data.remote.response.PayloadAvailableBookResp
 import com.example.cryptochallenge.utils.toBook
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class BooksRetrofitDataSource(
+class BooksRetrofitDataSource @Inject constructor(
     private val networkService: NetworkService
-): RemoteBooksDataSource {
+) : RemoteBooksDataSource {
 
     override fun fetchAllBooks(): Single<List<Book>> {
 

@@ -7,8 +7,9 @@ import com.example.cryptochallenge.utils.toOrderEntityList
 import com.example.cryptochallenge.utils.toOrderList
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class OrderBookRoomDataSource(
+class OrderBookRoomDataSource @Inject constructor(
     private val orderBookDao: OrderBookDao
 ) : LocalOrderBookDataSource {
     override fun getOrderBook(book: String): Single<OrderBook> {

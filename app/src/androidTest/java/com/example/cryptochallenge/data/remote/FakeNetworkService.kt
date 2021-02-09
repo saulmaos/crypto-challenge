@@ -24,8 +24,8 @@ class FakeNetworkService : NetworkService {
         return tickerResponse!!
     }
 
-    override fun doOrderBookCall(book: String): Single<BaseResponse<PayloadOrderBookResponse>> {
-        return Single.just(orderBookResponse)
+    override suspend fun doOrderBookCall(book: String): BaseResponse<PayloadOrderBookResponse> {
+        return orderBookResponse!!
     }
 }
 

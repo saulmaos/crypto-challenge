@@ -1,13 +1,14 @@
 package com.example.cryptochallenge.ui.detailAcitivity
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.cryptochallenge.MainCoroutineScopeRule
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.RxSchedulerRule
 import com.example.cryptochallenge.data.model.Order
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
-import com.example.cryptochallenge.ui.detailActivity.DetailViewModel
+import com.example.cryptochallenge.ui.detailFragment.DetailViewModel
 import com.example.cryptochallenge.utils.Event
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.google.common.truth.Truth.assertThat
@@ -15,16 +16,25 @@ import com.jraska.livedata.test
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnitRunner
+import kotlin.RuntimeException
 
 @RunWith(MockitoJUnitRunner::class)
 class DetailViewModelTest {
+
+    @ExperimentalCoroutinesApi
+    @get:Rule
+    val coroutineScope = MainCoroutineScopeRule()
+
     @get:Rule
     val rxSchedulerRule = RxSchedulerRule()
 
@@ -203,6 +213,7 @@ class DetailViewModelTest {
             .assertHistorySize(5)
     }
 
+    //
     @Test
     fun `given no internet and valid local ticker and orderBook when onInitialRequest should show the data`() {
         val internetError = Throwable("Error no internet detected - IT'S A TEST")
@@ -247,220 +258,220 @@ class DetailViewModelTest {
             .assertHistorySize(4)
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `given valid internet and valid server ticker and orderBook when onInitialRequest should show the data`() {
-        val isThereInternet = true
+    fun `given valid internet and valid server ticker and orderBook when onInitialRequest should show the data`() =
+        runBlockingTest {
+            val isThereInternet = true
 
-        `when`(networkHelper.observable())
-            .thenReturn(Observable.just(isThereInternet))
-        `when`(networkHelper.isNetworkConnected())
-            .thenReturn(isThereInternet)
-        `when`(coinDetailsRepository.requestTicker(book))
-            .thenReturn(Single.just(ticker))
-        `when`(coinDetailsRepository.saveTicker(ticker))
-            .thenReturn(Single.just(Unit))
-        `when`(coinDetailsRepository.requestOrderBook(book))
-            .thenReturn(Single.just(orderBook))
-        `when`(coinDetailsRepository.deleteOrderBook(book))
-            .thenReturn(Single.just(Unit))
-        `when`(coinDetailsRepository.saveOrderBook(orderBook))
-            .thenReturn(Single.just(Unit))
+            `when`(networkHelper.observable())
+                .thenReturn(Observable.just(isThereInternet))
+            `when`(networkHelper.isNetworkConnected())
+                .thenReturn(isThereInternet)
+            `when`(coinDetailsRepository.requestTicker(book))
+                .thenReturn(ticker)
+            `when`(coinDetailsRepository.saveTicker(ticker))
+                .thenReturn(Unit)
+            `when`(coinDetailsRepository.requestOrderBook(book))
+                .thenReturn(orderBook)
+            `when`(coinDetailsRepository.deleteOrderBook(book))
+                .thenReturn(Unit)
+            `when`(coinDetailsRepository.saveOrderBook(orderBook))
+                .thenReturn(Unit)
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+            val eventObserver = viewModel.events.test()
+                .assertNoValue()
 
-        viewModel.onInitialRequest(book)
+            viewModel.onInitialRequest(book)
 
-        networkHelper.observable().test()
-            .assertValue(isThereInternet)
-            .dispose()
+            networkHelper.observable().test()
+                .assertValue(isThereInternet)
+                .dispose()
 
-        assertThat(networkHelper.isNetworkConnected()).isTrue()
+            assertThat(networkHelper.isNetworkConnected()).isTrue()
 
-        coinDetailsRepository.requestTicker(book).test()
-            .assertValue(ticker)
-            .dispose()
+//        coinDetailsRepository.requestTicker(book).test()
+//            .assertValue(ticker)
+//            .dispose()
+//
+//        coinDetailsRepository.requestOrderBook(book).test()
+//            .assertValue(orderBook)
+//            .dispose()
 
-        coinDetailsRepository.requestOrderBook(book).test()
-            .assertValue(orderBook)
-            .dispose()
+            eventObserver
+                .assertHasValue()
+                .assertValueHistory(
+                    Event(DetailViewModel.DetailNavigation.ShowLoading),
+                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
+                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
+                    Event(DetailViewModel.DetailNavigation.HideLoading)
+                )
+                .assertHistorySize(4)
+        }
 
-        eventObserver
-            .assertHasValue()
-            .assertValueHistory(
-                Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
-                Event(DetailViewModel.DetailNavigation.HideLoading)
-            )
-            .assertHistorySize(4)
-    }
-
+    @ExperimentalCoroutinesApi
     @Test
-    fun `given valid internet and valid local ticker and valid server orderBook when onInitialRequest should show the data`() {
-        val tickerError = Throwable("Error fetching Ticker from server - IT'S A TEST")
-        val isThereInternet = true
+    fun `given valid internet and valid local ticker and valid server orderBook when onInitialRequest should show the data`() =
+        runBlockingTest {
+            val tickerError = RuntimeException("Error fetching Ticker from server - IT'S A TEST")
+            val isThereInternet = true
 
-        `when`(networkHelper.observable())
-            .thenReturn(Observable.just(isThereInternet))
-        `when`(networkHelper.isNetworkConnected())
-            .thenReturn(isThereInternet)
+            `when`(networkHelper.observable())
+                .thenReturn(Observable.just(isThereInternet))
+            `when`(networkHelper.isNetworkConnected())
+                .thenReturn(isThereInternet)
 
-        `when`(coinDetailsRepository.requestTicker(book))
-            .thenReturn(Single.error(tickerError))
-        `when`(coinDetailsRepository.getLocalTicker(book))
-            .thenReturn(Single.just(ticker))
+            `when`(coinDetailsRepository.requestTicker(book))
+                .thenThrow(tickerError)
 
-        `when`(coinDetailsRepository.requestOrderBook(book))
-            .thenReturn(Single.just(orderBook))
-        `when`(coinDetailsRepository.deleteOrderBook(book))
-            .thenReturn(Single.just(Unit))
-        `when`(coinDetailsRepository.saveOrderBook(orderBook))
-            .thenReturn(Single.just(Unit))
+            `when`(coinDetailsRepository.getLocalTicker(book))
+                .thenReturn(Single.just(ticker))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+            `when`(coinDetailsRepository.requestOrderBook(book))
+                .thenReturn(orderBook)
+            `when`(coinDetailsRepository.deleteOrderBook(book))
+                .thenReturn(Unit)
+            `when`(coinDetailsRepository.saveOrderBook(orderBook))
+                .thenReturn(Unit)
 
-        viewModel.onInitialRequest(book)
+            val eventObserver = viewModel.events.test()
+                .assertNoValue()
 
-        networkHelper.observable().test()
-            .assertValue(isThereInternet)
-            .dispose()
+            viewModel.onInitialRequest(book)
 
-        assertThat(networkHelper.isNetworkConnected()).isTrue()
+            networkHelper.observable().test()
+                .assertValue(isThereInternet)
+                .dispose()
 
-        coinDetailsRepository.requestTicker(book).test()
-            .assertError(tickerError)
-            .dispose()
+            assertThat(networkHelper.isNetworkConnected()).isTrue()
 
-        coinDetailsRepository.getLocalTicker(book).test()
-            .assertValue(ticker)
-            .dispose()
+            verify(coinDetailsRepository).requestTicker(book)
 
-        coinDetailsRepository.requestOrderBook(book).test()
-            .assertValue(orderBook)
-            .dispose()
+            coinDetailsRepository.getLocalTicker(book).test()
+                .assertValue(ticker)
+                .dispose()
 
-        eventObserver
-            .assertHasValue()
-            .assertValueHistory(
-                Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
-                Event(DetailViewModel.DetailNavigation.HideLoading)
-            )
-            .assertHistorySize(4)
-    }
+            verify(coinDetailsRepository).requestOrderBook(book)
+            verify(coinDetailsRepository).deleteOrderBook(book)
+            verify(coinDetailsRepository).saveOrderBook(orderBook)
 
+            eventObserver
+                .assertHasValue()
+                .assertValueHistory(
+                    Event(DetailViewModel.DetailNavigation.ShowLoading),
+                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
+                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
+                    Event(DetailViewModel.DetailNavigation.HideLoading)
+                )
+                .assertHistorySize(4)
+        }
+
+    @ExperimentalCoroutinesApi
     @Test
-    fun `given valid internet and valid server ticker and valid local orderBook when onInitialRequest should show the data`() {
-        val orderBookError = Throwable("Error fetching OrderBook from server - IT'S A TEST")
-        val isThereInternet = true
+    fun `given valid internet and valid server ticker and valid local orderBook when onInitialRequest should show the data`() =
+        runBlockingTest {
+            val orderBookError =
+                RuntimeException("Error fetching OrderBook from server - IT'S A TEST")
+            val isThereInternet = true
 
-        `when`(networkHelper.observable())
-            .thenReturn(Observable.just(isThereInternet))
-        `when`(networkHelper.isNetworkConnected())
-            .thenReturn(isThereInternet)
+            `when`(networkHelper.observable())
+                .thenReturn(Observable.just(isThereInternet))
+            `when`(networkHelper.isNetworkConnected())
+                .thenReturn(isThereInternet)
 
-        `when`(coinDetailsRepository.requestTicker(book))
-            .thenReturn(Single.just(ticker))
-        `when`(coinDetailsRepository.saveTicker(ticker))
-            .thenReturn(Single.just(Unit))
+            `when`(coinDetailsRepository.requestTicker(book))
+                .thenReturn(ticker)
+            `when`(coinDetailsRepository.saveTicker(ticker))
+                .thenReturn(Unit)
 
-        `when`(coinDetailsRepository.requestOrderBook(book))
-            .thenReturn(Single.error(orderBookError))
-        `when`(coinDetailsRepository.getLocalOrderBook(book))
-            .thenReturn(Single.just(orderBook))
+            `when`(coinDetailsRepository.requestOrderBook(book))
+                .thenThrow(orderBookError)
+            `when`(coinDetailsRepository.getLocalOrderBook(book))
+                .thenReturn(Single.just(orderBook))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+            val eventObserver = viewModel.events.test()
+                .assertNoValue()
 
-        viewModel.onInitialRequest(book)
+            viewModel.onInitialRequest(book)
 
-        networkHelper.observable().test()
-            .assertValue(isThereInternet)
-            .dispose()
+            networkHelper.observable().test()
+                .assertValue(isThereInternet)
+                .dispose()
 
-        assertThat(networkHelper.isNetworkConnected()).isTrue()
+            assertThat(networkHelper.isNetworkConnected()).isTrue()
 
-        coinDetailsRepository.requestTicker(book).test()
-            .assertValue(ticker)
-            .dispose()
+            verify(coinDetailsRepository).requestTicker(book)
+            verify(coinDetailsRepository).saveTicker(ticker)
+            verify(coinDetailsRepository).requestOrderBook(book)
 
-        coinDetailsRepository.requestOrderBook(book).test()
-            .assertError(orderBookError)
-            .dispose()
+            coinDetailsRepository.getLocalOrderBook(book).test()
+                .assertValue(orderBook)
+                .dispose()
 
-        coinDetailsRepository.getLocalOrderBook(book).test()
-            .assertValue(orderBook)
-            .dispose()
+            eventObserver
+                .assertHasValue()
+                .assertValueHistory(
+                    Event(DetailViewModel.DetailNavigation.ShowLoading),
+                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
+                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
+                    Event(DetailViewModel.DetailNavigation.HideLoading)
+                )
+                .assertHistorySize(4)
+        }
 
-        eventObserver
-            .assertHasValue()
-            .assertValueHistory(
-                Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
-                Event(DetailViewModel.DetailNavigation.HideLoading)
-            )
-            .assertHistorySize(4)
-    }
-
+    @ExperimentalCoroutinesApi
     @Test
-    fun `given valid internet and valid local ticker and orderBook when onInitialRequest should show the data`() {
-        val tickerError = Throwable("Error fetching Ticker from server - IT'S A TEST")
-        val orderBookError = Throwable("Error fetching OrderBook from server - IT'S A TEST")
-        val isThereInternet = true
+    fun `given valid internet and valid local ticker and orderBook when onInitialRequest should show the data`() =
+        runBlockingTest {
+            val tickerError = RuntimeException("Error fetching Ticker from server - IT'S A TEST")
+            val orderBookError = RuntimeException("Error fetching OrderBook from server - IT'S A TEST")
+            val isThereInternet = true
 
-        `when`(networkHelper.observable())
-            .thenReturn(Observable.just(isThereInternet))
-        `when`(networkHelper.isNetworkConnected())
-            .thenReturn(isThereInternet)
+            `when`(networkHelper.observable())
+                .thenReturn(Observable.just(isThereInternet))
+            `when`(networkHelper.isNetworkConnected())
+                .thenReturn(isThereInternet)
 
-        `when`(coinDetailsRepository.requestTicker(book))
-            .thenReturn(Single.error(tickerError))
-        `when`(coinDetailsRepository.getLocalTicker(book))
-            .thenReturn(Single.just(ticker))
+            `when`(coinDetailsRepository.requestTicker(book))
+                .thenThrow(tickerError)
+            `when`(coinDetailsRepository.getLocalTicker(book))
+                .thenReturn(Single.just(ticker))
 
-        `when`(coinDetailsRepository.requestOrderBook(book))
-            .thenReturn(Single.error(orderBookError))
-        `when`(coinDetailsRepository.getLocalOrderBook(book))
-            .thenReturn(Single.just(orderBook))
+            `when`(coinDetailsRepository.requestOrderBook(book))
+                .thenThrow(orderBookError)
+            `when`(coinDetailsRepository.getLocalOrderBook(book))
+                .thenReturn(Single.just(orderBook))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+            val eventObserver = viewModel.events.test()
+                .assertNoValue()
 
-        viewModel.onInitialRequest(book)
+            viewModel.onInitialRequest(book)
 
-        networkHelper.observable().test()
-            .assertValue(isThereInternet)
-            .dispose()
-        assertThat(networkHelper.isNetworkConnected()).isTrue()
+            networkHelper.observable().test()
+                .assertValue(isThereInternet)
+                .dispose()
+            assertThat(networkHelper.isNetworkConnected()).isTrue()
 
-        coinDetailsRepository.requestTicker(book).test()
-            .assertError(tickerError)
-            .dispose()
-        coinDetailsRepository.getLocalTicker(book).test()
-            .assertValue(ticker)
-            .dispose()
+            verify(coinDetailsRepository).requestTicker(book)
+            coinDetailsRepository.getLocalTicker(book).test()
+                .assertValue(ticker)
+                .dispose()
 
-        coinDetailsRepository.requestOrderBook(book).test()
-            .assertError(orderBookError)
-            .dispose()
-        coinDetailsRepository.getLocalOrderBook(book).test()
-            .assertValue(orderBook)
-            .dispose()
+            verify(coinDetailsRepository).requestOrderBook(book)
+            coinDetailsRepository.getLocalOrderBook(book).test()
+                .assertValue(orderBook)
+                .dispose()
 
-        eventObserver
-            .assertHasValue()
-            .assertValueHistory(
-                Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
-                Event(DetailViewModel.DetailNavigation.HideLoading)
-            )
-            .assertHistorySize(4)
-    }
+            eventObserver
+                .assertHasValue()
+                .assertValueHistory(
+                    Event(DetailViewModel.DetailNavigation.ShowLoading),
+                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
+                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
+                    Event(DetailViewModel.DetailNavigation.HideLoading)
+                )
+                .assertHistorySize(4)
+        }
 
     @Test
     fun `given no internet when onReloadPressed should show no internet msg`() {

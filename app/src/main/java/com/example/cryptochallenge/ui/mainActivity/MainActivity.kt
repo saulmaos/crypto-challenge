@@ -6,7 +6,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

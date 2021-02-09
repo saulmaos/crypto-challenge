@@ -3,8 +3,9 @@ package com.example.cryptochallenge.data.repository.dataSources
 import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.remote.NetworkService
 import com.example.cryptochallenge.utils.toTicker
+import javax.inject.Inject
 
-class TickerRetrofitDataSource(
+class TickerRetrofitDataSource @Inject constructor(
     private val networkService: NetworkService
 ) : RemoteTickerDataSource {
 

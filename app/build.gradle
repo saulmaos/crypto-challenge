@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -16,12 +17,18 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.example.cryptochallenge.CustomTestRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
+        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.test:monitor:${rootProject.androidxTestRunnerVersion}"
         }
     }
 
@@ -86,7 +93,6 @@ dependencies {
 
     // Room
     implementation roomLib
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     kapt roomCompiler
     implementation roomRxJavaLib
 
@@ -98,16 +104,27 @@ dependencies {
     implementation coroutinesLib
     implementation coroutinesAndroidLib
 
+    // Hilt
+    implementation hiltLib
+    kapt hiltCompiler
+    implementation hiltViewModelLib
+    kapt hiltViewModelCompiler
+
     // Testing
     testImplementation jUnitLib
     testImplementation mockitoLib
     testImplementation coreTestingLib
     testImplementation truthLib
     testImplementation liveDataTestingLib
+    testImplementation coroutinesTestLib
 
     // Android Testing
     androidTestImplementation testRunnerLib
     androidTestImplementation testJUnitLib
     androidTestImplementation coreTestingLib
     androidTestImplementation espressoLib
+    androidTestImplementation testHiltLib
+    kaptAndroidTest hiltCompiler
+    kaptAndroidTest hiltViewModelCompiler
+    debugImplementation fragmentTestLib
 }
