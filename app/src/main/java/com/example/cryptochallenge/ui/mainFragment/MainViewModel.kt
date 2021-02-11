@@ -26,6 +26,9 @@ class MainViewModel @ViewModelInject constructor(
     private val _events = MutableLiveData<Event<MainNavigation>>()
     val events: LiveData<Event<MainNavigation>> = _events
 
+    private val _data = MutableLiveData<RequestResult>()
+    val data: LiveData<RequestResult> = _data
+
     /*
     * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
     * `if (events.value != null)` is used to avoid calling it when config changes occur
@@ -63,7 +66,7 @@ class MainViewModel @ViewModelInject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    _events.value = Event(MainNavigation.BooksList(it))
+                    _data.value = RequestResult.BooksList(it)
                     _events.value = Event(MainNavigation.HideBooksListLoading)
                 },
                 {
@@ -83,12 +86,12 @@ class MainViewModel @ViewModelInject constructor(
             }
             .subscribe(
                 {
-                    if (it.isEmpty()) _events.value = Event(MainNavigation.NoDataFound)
-                    else _events.value = Event(MainNavigation.BooksList(it))
+                    if (it.isEmpty()) _data.value = RequestResult.NoDataFound
+                    else _data.value = RequestResult.BooksList(it)
                 },
                 {
                     it.printStackTrace()
-                    _events.value = Event(MainNavigation.NoDataFound)
+                    _data.value = RequestResult.NoDataFound
                 }
             )
             .let { compositeDisposable.add(it) }
@@ -103,10 +106,13 @@ class MainViewModel @ViewModelInject constructor(
         compositeDisposable.clear()
     }
 
+    sealed class RequestResult {
+        data class BooksList(val books: List<Book>) : RequestResult()
+        object NoDataFound : RequestResult()
+    }
+
     sealed class MainNavigation {
-        data class BooksList(val books: List<Book>) : MainNavigation()
         data class Error(@StringRes val errorId: Int) : MainNavigation()
-        object NoDataFound : MainNavigation()
         object HideBooksListLoading : MainNavigation()
         object ShowBooksListLoading : MainNavigation()
     }

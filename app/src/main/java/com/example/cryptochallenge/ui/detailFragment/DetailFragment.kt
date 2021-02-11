@@ -95,22 +95,28 @@ class DetailFragment : Fragment() {
                     DetailViewModel.DetailNavigation.ShowLoading -> {
                         binding.progressBar.visibility = View.VISIBLE
                     }
-                    is DetailViewModel.DetailNavigation.TickerResult -> {
-                        binding.tvLastPriceVal.text = it.ticker.last
-                        binding.tvCurrency.text = it.ticker.currency
-                        binding.tvAskVal.text = it.ticker.ask
-                        binding.tvBidVal.text = it.ticker.bid
-                        binding.tvLastUpdate.text =
-                            getString(R.string.last_update, it.ticker.createdAt)
-                        binding.tvHighVal.text = it.ticker.high
-                        binding.tvLowVal.text = it.ticker.low
-                        binding.tvVolumeVal.text = it.ticker.volume
-                    }
-                    is DetailViewModel.DetailNavigation.OrderBookResult -> {
-                        bidsAdapter.submitList(it.orderBook.bids)
-                        asksAdapter.submitList(it.orderBook.asks)
-                    }
                 }
+            }
+        )
+        viewModel.ticker.observe(
+            viewLifecycleOwner,
+            {
+                binding.tvLastPriceVal.text = it.last
+                binding.tvCurrency.text = it.currency
+                binding.tvAskVal.text = it.ask
+                binding.tvBidVal.text = it.bid
+                binding.tvLastUpdate.text =
+                    getString(R.string.last_update, it.createdAt)
+                binding.tvHighVal.text = it.high
+                binding.tvLowVal.text = it.low
+                binding.tvVolumeVal.text = it.volume
+            }
+        )
+        viewModel.orderBook.observe(
+            viewLifecycleOwner,
+            {
+                bidsAdapter.submitList(it.bids)
+                asksAdapter.submitList(it.asks)
             }
         )
         viewModel.pair.observe(

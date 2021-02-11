@@ -1,4 +1,4 @@
-package com.example.cryptochallenge.ui.detailAcitivity
+package com.example.cryptochallenge.ui.detailFragment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.cryptochallenge.MainCoroutineScopeRule
@@ -8,7 +8,6 @@ import com.example.cryptochallenge.data.model.Order
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
-import com.example.cryptochallenge.ui.detailFragment.DetailViewModel
 import com.example.cryptochallenge.utils.Event
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.google.common.truth.Truth.assertThat
@@ -85,11 +84,10 @@ class DetailViewModelTest {
         `when`(coinDetailsRepository.getLocalOrderBook(book))
             .thenReturn(Single.error(orderBookError))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
-
-        val pairObserver = viewModel.pair.test()
-            .assertNoValue()
+        val eventObserver = viewModel.events.test().assertNoValue()
+        val pairObserver = viewModel.pair.test().assertNoValue()
+        val tickerObserver = viewModel.ticker.test().assertNoValue()
+        val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
         viewModel.onInitialRequest(book)
 
@@ -111,12 +109,16 @@ class DetailViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(Ticker.defaultTicker())),
                 Event(DetailViewModel.DetailNavigation.Error(R.string.error_on_request_data)),
                 Event(DetailViewModel.DetailNavigation.Error(R.string.error_on_request_data)),
                 Event(DetailViewModel.DetailNavigation.HideLoading)
             )
-            .assertHistorySize(5)
+            .assertHistorySize(4)
+        tickerObserver
+            .assertValue(Ticker.defaultTicker())
+            .assertHistorySize(1)
+        orderBookObserver
+            .assertNoValue()
         pairObserver
             .assertHasValue()
             .assertValue(Pair(params[0], params[1]))
@@ -137,8 +139,9 @@ class DetailViewModelTest {
         `when`(coinDetailsRepository.getLocalOrderBook(book))
             .thenReturn(Single.error(orderBookError))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+        val eventObserver = viewModel.events.test().assertNoValue()
+        val tickerObserver = viewModel.ticker.test().assertNoValue()
+        val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
         viewModel.onInitialRequest(book)
 
@@ -160,11 +163,15 @@ class DetailViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
                 Event(DetailViewModel.DetailNavigation.Error(R.string.error_on_request_data)),
                 Event(DetailViewModel.DetailNavigation.HideLoading)
             )
-            .assertHistorySize(4)
+            .assertHistorySize(3)
+        tickerObserver
+            .assertValue(ticker)
+            .assertHistorySize(1)
+        orderBookObserver
+            .assertNoValue()
     }
 
     @Test
@@ -182,8 +189,9 @@ class DetailViewModelTest {
         `when`(coinDetailsRepository.getLocalOrderBook(book))
             .thenReturn(Single.just(orderBook))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+        val eventObserver = viewModel.events.test().assertNoValue()
+        val tickerObserver = viewModel.ticker.test().assertNoValue()
+        val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
         viewModel.onInitialRequest(book)
 
@@ -205,12 +213,16 @@ class DetailViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(Ticker.defaultTicker())),
                 Event(DetailViewModel.DetailNavigation.Error(R.string.error_on_request_data)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                 Event(DetailViewModel.DetailNavigation.HideLoading)
             )
-            .assertHistorySize(5)
+            .assertHistorySize(3)
+        tickerObserver
+            .assertValue(Ticker.defaultTicker())
+            .assertHistorySize(1)
+        orderBookObserver
+            .assertValue(orderBook)
+            .assertHistorySize(1)
     }
 
     //
@@ -228,8 +240,9 @@ class DetailViewModelTest {
         `when`(coinDetailsRepository.getLocalOrderBook(book))
             .thenReturn(Single.just(orderBook))
 
-        val eventObserver = viewModel.events.test()
-            .assertNoValue()
+        val eventObserver = viewModel.events.test().assertNoValue()
+        val tickerObserver = viewModel.ticker.test().assertNoValue()
+        val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
         viewModel.onInitialRequest(book)
 
@@ -251,11 +264,15 @@ class DetailViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(DetailViewModel.DetailNavigation.ShowLoading),
-                Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                 Event(DetailViewModel.DetailNavigation.HideLoading)
             )
-            .assertHistorySize(4)
+            .assertHistorySize(2)
+        tickerObserver
+            .assertValue(ticker)
+            .assertHistorySize(1)
+        orderBookObserver
+            .assertValue(orderBook)
+            .assertHistorySize(1)
     }
 
     @ExperimentalCoroutinesApi
@@ -279,8 +296,9 @@ class DetailViewModelTest {
             `when`(coinDetailsRepository.saveOrderBook(orderBook))
                 .thenReturn(Unit)
 
-            val eventObserver = viewModel.events.test()
-                .assertNoValue()
+            val eventObserver = viewModel.events.test().assertNoValue()
+            val tickerObserver = viewModel.ticker.test().assertNoValue()
+            val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
             viewModel.onInitialRequest(book)
 
@@ -290,23 +308,19 @@ class DetailViewModelTest {
 
             assertThat(networkHelper.isNetworkConnected()).isTrue()
 
-//        coinDetailsRepository.requestTicker(book).test()
-//            .assertValue(ticker)
-//            .dispose()
-//
-//        coinDetailsRepository.requestOrderBook(book).test()
-//            .assertValue(orderBook)
-//            .dispose()
-
             eventObserver
                 .assertHasValue()
                 .assertValueHistory(
                     Event(DetailViewModel.DetailNavigation.ShowLoading),
-                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                     Event(DetailViewModel.DetailNavigation.HideLoading)
                 )
-                .assertHistorySize(4)
+                .assertHistorySize(2)
+            tickerObserver
+                .assertValue(ticker)
+                .assertHistorySize(1)
+            orderBookObserver
+                .assertValue(orderBook)
+                .assertHistorySize(1)
         }
 
     @ExperimentalCoroutinesApi
@@ -334,8 +348,9 @@ class DetailViewModelTest {
             `when`(coinDetailsRepository.saveOrderBook(orderBook))
                 .thenReturn(Unit)
 
-            val eventObserver = viewModel.events.test()
-                .assertNoValue()
+            val eventObserver = viewModel.events.test().assertNoValue()
+            val tickerObserver = viewModel.ticker.test().assertNoValue()
+            val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
             viewModel.onInitialRequest(book)
 
@@ -359,11 +374,15 @@ class DetailViewModelTest {
                 .assertHasValue()
                 .assertValueHistory(
                     Event(DetailViewModel.DetailNavigation.ShowLoading),
-                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                     Event(DetailViewModel.DetailNavigation.HideLoading)
                 )
-                .assertHistorySize(4)
+                .assertHistorySize(2)
+            tickerObserver
+                .assertValue(ticker)
+                .assertHistorySize(1)
+            orderBookObserver
+                .assertValue(orderBook)
+                .assertHistorySize(1)
         }
 
     @ExperimentalCoroutinesApi
@@ -389,8 +408,9 @@ class DetailViewModelTest {
             `when`(coinDetailsRepository.getLocalOrderBook(book))
                 .thenReturn(Single.just(orderBook))
 
-            val eventObserver = viewModel.events.test()
-                .assertNoValue()
+            val eventObserver = viewModel.events.test().assertNoValue()
+            val tickerObserver = viewModel.ticker.test().assertNoValue()
+            val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
             viewModel.onInitialRequest(book)
 
@@ -412,11 +432,15 @@ class DetailViewModelTest {
                 .assertHasValue()
                 .assertValueHistory(
                     Event(DetailViewModel.DetailNavigation.ShowLoading),
-                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                     Event(DetailViewModel.DetailNavigation.HideLoading)
                 )
-                .assertHistorySize(4)
+                .assertHistorySize(2)
+            tickerObserver
+                .assertValue(ticker)
+                .assertHistorySize(1)
+            orderBookObserver
+                .assertValue(orderBook)
+                .assertHistorySize(1)
         }
 
     @ExperimentalCoroutinesApi
@@ -442,8 +466,9 @@ class DetailViewModelTest {
             `when`(coinDetailsRepository.getLocalOrderBook(book))
                 .thenReturn(Single.just(orderBook))
 
-            val eventObserver = viewModel.events.test()
-                .assertNoValue()
+            val eventObserver = viewModel.events.test().assertNoValue()
+            val tickerObserver = viewModel.ticker.test().assertNoValue()
+            val orderBookObserver = viewModel.orderBook.test().assertNoValue()
 
             viewModel.onInitialRequest(book)
 
@@ -466,11 +491,15 @@ class DetailViewModelTest {
                 .assertHasValue()
                 .assertValueHistory(
                     Event(DetailViewModel.DetailNavigation.ShowLoading),
-                    Event(DetailViewModel.DetailNavigation.TickerResult(ticker)),
-                    Event(DetailViewModel.DetailNavigation.OrderBookResult(orderBook)),
                     Event(DetailViewModel.DetailNavigation.HideLoading)
                 )
-                .assertHistorySize(4)
+                .assertHistorySize(2)
+            tickerObserver
+                .assertValue(ticker)
+                .assertHistorySize(1)
+            orderBookObserver
+                .assertValue(orderBook)
+                .assertHistorySize(1)
         }
 
     @Test

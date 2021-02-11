@@ -1,11 +1,10 @@
-package com.example.cryptochallenge.ui.mainAcitivity
+package com.example.cryptochallenge.ui.mainFragment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.RxSchedulerRule
 import com.example.cryptochallenge.data.model.Book
 import com.example.cryptochallenge.data.repository.BooksRepository
-import com.example.cryptochallenge.ui.mainFragment.MainViewModel
 import com.example.cryptochallenge.utils.Event
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import com.google.common.truth.Truth.assertThat
@@ -65,6 +64,7 @@ class MainViewModelTest {
 
         val liveObserver = viewModel.events.test()
             .assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onInitialRequest()
 
@@ -82,10 +82,11 @@ class MainViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
-                Event(MainViewModel.MainNavigation.NoDataFound),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(3)
+            .assertHistorySize(2)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.NoDataFound)
     }
 
     @Test
@@ -99,9 +100,8 @@ class MainViewModelTest {
         `when`(booksRepository.getLocalBooks())
             .thenReturn(Maybe.just(books))
 
-        val liveObserver = viewModel.events
-            .test()
-            .assertNoValue()
+        val liveObserver = viewModel.events.test().assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onInitialRequest()
 
@@ -119,10 +119,11 @@ class MainViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
-                Event(MainViewModel.MainNavigation.NoDataFound),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(3)
+            .assertHistorySize(2)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.NoDataFound)
     }
 
     @Test
@@ -136,9 +137,8 @@ class MainViewModelTest {
         `when`(booksRepository.getLocalBooks())
             .thenReturn(Maybe.just(books))
 
-        val liveObserver = viewModel.events
-            .test()
-            .assertNoValue()
+        val liveObserver = viewModel.events.test().assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onInitialRequest()
 
@@ -156,10 +156,12 @@ class MainViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
-                Event(MainViewModel.MainNavigation.BooksList(books)),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(3)
+            .assertHistorySize(2)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.BooksList(books))
+            .assertHistorySize(1)
     }
 
     @Test
@@ -176,8 +178,8 @@ class MainViewModelTest {
         `when`(booksRepository.saveList(books))
             .thenReturn(Single.just(Unit))
 
-        val liveObserver = viewModel.events.test()
-            .assertNoValue()
+        val liveObserver = viewModel.events.test().assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onInitialRequest()
 
@@ -199,10 +201,12 @@ class MainViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
-                Event(MainViewModel.MainNavigation.BooksList(books)),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(3)
+            .assertHistorySize(2)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.BooksList(books))
+            .assertHistorySize(1)
     }
 
     @Test
@@ -220,8 +224,8 @@ class MainViewModelTest {
         `when`(booksRepository.getLocalBooks())
             .thenReturn(Maybe.just(books))
 
-        val liveObserver = viewModel.events.test()
-            .assertNoValue()
+        val liveObserver = viewModel.events.test().assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onInitialRequest()
 
@@ -244,10 +248,12 @@ class MainViewModelTest {
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
                 Event(MainViewModel.MainNavigation.Error(R.string.error_on_request_books)),
-                Event(MainViewModel.MainNavigation.BooksList(books)),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(4)
+            .assertHistorySize(3)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.BooksList(books))
+            .assertHistorySize(1)
     }
 
     @Test
@@ -293,8 +299,8 @@ class MainViewModelTest {
         `when`(booksRepository.saveList(books))
             .thenReturn(Single.just(Unit))
 
-        val liveObserver = viewModel.events.test()
-            .assertNoValue()
+        val liveObserver = viewModel.events.test().assertNoValue()
+        val dataObserver = viewModel.data.test().assertNoValue()
 
         viewModel.onReload()
 
@@ -312,9 +318,11 @@ class MainViewModelTest {
             .assertHasValue()
             .assertValueHistory(
                 Event(MainViewModel.MainNavigation.ShowBooksListLoading),
-                Event(MainViewModel.MainNavigation.BooksList(books)),
                 Event(MainViewModel.MainNavigation.HideBooksListLoading)
             )
-            .assertHistorySize(3)
+            .assertHistorySize(2)
+        dataObserver
+            .assertValue(MainViewModel.RequestResult.BooksList(books))
+            .assertHistorySize(1)
     }
 }

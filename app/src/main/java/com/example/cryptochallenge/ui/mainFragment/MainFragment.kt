@@ -75,10 +75,17 @@ class MainFragment : Fragment() {
                         if (!binding.srlCoins.isRefreshing) binding.srlCoins.isRefreshing = true
                         binding.tvNoInternet.visibility = View.GONE
                     }
-                    is MainViewModel.MainNavigation.BooksList -> {
+                }
+            }
+        )
+        viewModel.data.observe(
+            viewLifecycleOwner,
+            {
+                when (it) {
+                    is MainViewModel.RequestResult.BooksList -> {
                         booksAdapter.submitList(it.books)
                     }
-                    MainViewModel.MainNavigation.NoDataFound -> {
+                    MainViewModel.RequestResult.NoDataFound -> {
                         binding.tvNoInternet.visibility = View.VISIBLE
                     }
                 }

@@ -48,7 +48,7 @@ ext{
     hiltViewModelVersion = "1.0.0-alpha02"
     jUnitVersion = '4.13.1'
     mockitoVersion = '3.3.3'
-    coreTestingVersion = '1.1.1'
+    coreTestingVersion = '2.1.0'
     liveDataTestingVersion = '1.1.2'
     truthVersion = '1.1.2'
     testRunnerVersion = "1.3.0"
@@ -127,7 +127,7 @@ ext{
     mockitoLib = "org.mockito:mockito-core:$mockitoVersion"
 
     // Core Testing
-    coreTestingLib = "android.arch.core:core-testing:$coreTestingVersion"
+    coreTestingLib = "androidx.arch.core:core-testing:$coreTestingVersion"
 
     // Truth
     truthLib = "com.google.truth:truth:$truthVersion"

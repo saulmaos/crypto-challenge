@@ -30,6 +30,12 @@ class DetailViewModel @ViewModelInject constructor(
     private val _pair = MutableLiveData<Pair<String, String>>()
     val pair: LiveData<Pair<String, String>> = _pair
 
+    private val _ticker = MutableLiveData<Ticker>()
+    val ticker: LiveData<Ticker> = _ticker
+
+    private val _orderBook = MutableLiveData<OrderBook>()
+    val orderBook: LiveData<OrderBook> = _orderBook
+
     /*
     * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
     * `if (events.value != null)` is used to avoid calling it when config changes occur
@@ -83,7 +89,7 @@ class DetailViewModel @ViewModelInject constructor(
             coinDetailsRepository.deleteOrderBook(book)
             coinDetailsRepository.saveOrderBook(orderBook)
 
-            _events.value = Event(DetailNavigation.OrderBookResult(orderBook))
+            _orderBook.value = orderBook
             orderBookRequestFinished = true
             if (tickerRequestFinished && orderBookRequestFinished)
                 _events.value = Event(DetailNavigation.HideLoading)
@@ -97,7 +103,7 @@ class DetailViewModel @ViewModelInject constructor(
         try {
             val ticker: Ticker = coinDetailsRepository.requestTicker(book)
             coinDetailsRepository.saveTicker(ticker)
-            _events.value = Event(DetailNavigation.TickerResult(ticker))
+            _ticker.value = ticker
             tickerRequestFinished = true
             if (tickerRequestFinished && orderBookRequestFinished)
                 _events.value = Event(DetailNavigation.HideLoading)
@@ -119,7 +125,7 @@ class DetailViewModel @ViewModelInject constructor(
                 {
                     if (it.asks.isEmpty()) _events.value =
                         Event(DetailNavigation.Error(R.string.error_on_request_data))
-                    else _events.value = Event(DetailNavigation.OrderBookResult(it))
+                    else _orderBook.value = it
                 },
                 {
                     _events.value =
@@ -138,13 +144,11 @@ class DetailViewModel @ViewModelInject constructor(
             }
             .subscribe(
                 {
-                    _events.value = Event(DetailNavigation.TickerResult(it))
+                    _ticker.value = it
                 },
                 {
                     it.printStackTrace()
-                    _events.value = Event(
-                        DetailNavigation.TickerResult(Ticker.defaultTicker())
-                    )
+                    _ticker.value = Ticker.defaultTicker()
                     _events.value =
                         Event(DetailNavigation.Error(R.string.error_on_request_data))
                 }
@@ -158,8 +162,6 @@ class DetailViewModel @ViewModelInject constructor(
 
     sealed class DetailNavigation {
         data class Error(@StringRes val errorId: Int) : DetailNavigation()
-        data class TickerResult(val ticker: Ticker) : DetailNavigation()
-        data class OrderBookResult(val orderBook: OrderBook) : DetailNavigation()
         object HideLoading : DetailNavigation()
         object ShowLoading : DetailNavigation()
     }
