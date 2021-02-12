@@ -29,12 +29,3 @@ object TestNetworkServiceModule {
     fun provideNetworkService(): NetworkService =
         FakeNetworkService()
 }
-
-//@InstallIn(ApplicationComponent::class)
-//@Module
-//object ConnectivityModule {
-//
-//    @Provides
-//    fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager =
-//        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-//}
