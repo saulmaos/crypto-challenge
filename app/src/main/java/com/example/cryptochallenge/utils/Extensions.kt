@@ -42,8 +42,14 @@ fun View.showSnackBar(@StringRes msg: Int) {
 
 fun List<BookEntity>.toBookList(): List<Book> = map {
     Book(
-        it.book, "", "", "",
-        "", "", "", createUrl(it.book)
+        it.book,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        createUrl(it.book)
     )
 }
 

@@ -18,7 +18,7 @@ class TickerRoomDataSource @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override suspend fun insertTicker(ticker: Ticker){
+    override suspend fun insertTicker(ticker: Ticker) {
         tickerDao.insert(ticker.toTickerEntity())
     }
 }
