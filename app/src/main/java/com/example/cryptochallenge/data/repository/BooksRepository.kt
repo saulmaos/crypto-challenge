@@ -5,8 +5,9 @@ import com.example.cryptochallenge.data.repository.dataSources.LocalBooksDataSou
 import com.example.cryptochallenge.data.repository.dataSources.RemoteBooksDataSource
 import io.reactivex.Maybe
 import io.reactivex.Single
+import javax.inject.Inject
 
-class BooksRepository(
+class BooksRepository @Inject constructor(
     private val remoteBooksDataSource: RemoteBooksDataSource,
     private val localBooksDataSource: LocalBooksDataSource
 ) {

@@ -14,8 +14,8 @@ interface NetworkService {
     fun doAvailableBooksCall(): Single<BaseResponse<List<PayloadAvailableBookResponse>>>
 
     @GET(TICKER)
-    fun doTickerCall(@Query("book") book: String): Single<BaseResponse<PayloadTickerResponse>>
+    suspend fun doTickerCall(@Query("book") book: String): BaseResponse<PayloadTickerResponse>
 
     @GET(ORDER_BOOK)
-    fun doOrderBookCall(@Query("book") book: String): Single<BaseResponse<PayloadOrderBookResponse>>
+    suspend fun doOrderBookCall(@Query("book") book: String): BaseResponse<PayloadOrderBookResponse>
 }

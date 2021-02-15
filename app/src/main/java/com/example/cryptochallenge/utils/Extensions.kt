@@ -18,6 +18,10 @@ import com.example.cryptochallenge.data.remote.response.PayloadOrderBookResponse
 import com.example.cryptochallenge.data.remote.response.PayloadTickerResponse
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun ImageView.loadUrl(url: String) {
     Picasso
@@ -38,8 +42,14 @@ fun View.showSnackBar(@StringRes msg: Int) {
 
 fun List<BookEntity>.toBookList(): List<Book> = map {
     Book(
-        it.book, "", "", "",
-        "", "", "", CryptoIcons.createUrl(it.book)
+        it.book,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        createUrl(it.book)
     )
 }
 
@@ -70,7 +80,7 @@ fun PayloadAvailableBookResponse.toBook() =
         maximumPrice,
         minimumValue,
         maximumValue,
-        CryptoIcons.createUrl(book)
+        createUrl(book)
     )
 
 fun PayloadTickerResponse.toTicker() =
@@ -83,7 +93,7 @@ fun PayloadTickerResponse.toTicker() =
         vwap,
         ask,
         bid,
-        createdAt
+        createdAt.toHumanReadableDate()
     )
 
 fun PayloadOrderBookResponse.toOrderBook(): OrderBook {
@@ -95,3 +105,20 @@ fun PayloadOrderBookResponse.toOrderBook(): OrderBook {
     }
     return OrderBook(asks, bids)
 }
+
+fun String.toHumanReadableDate(): String =
+    try {
+        val utcFormat: DateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        utcFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+        val date: Date = utcFormat.parse(this)!!
+
+        val pstFormat: DateFormat =
+            SimpleDateFormat("dd.MMM.yyyy - hh:mm:ss aa", Locale.getDefault())
+        pstFormat.timeZone = TimeZone.getDefault()
+
+        pstFormat.format(date)
+    } catch (e: ParseException) {
+        e.printStackTrace()
+        this
+    }

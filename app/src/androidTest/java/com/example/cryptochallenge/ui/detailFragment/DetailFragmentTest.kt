@@ -1,38 +1,40 @@
-package com.example.cryptochallenge.ui.detailActivity
+package com.example.cryptochallenge.ui.detailFragment
 
-import android.content.Intent
-import androidx.test.core.app.ActivityScenario.launch
+import android.os.Bundle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.platform.app.InstrumentationRegistry
-import com.example.cryptochallenge.DependenciesTestRule
+import androidx.test.espresso.matcher.ViewMatchers.*
 import com.example.cryptochallenge.R
+import com.example.cryptochallenge.data.local.CryptoDatabase
 import com.example.cryptochallenge.data.model.Order
 import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.remote.FakeNetworkServiceConfig
-import com.example.cryptochallenge.ui.mainActivity.MainViewModel
-import com.example.cryptochallenge.utils.OrderType
-import com.example.cryptochallenge.utils.RecyclerViewMatcher
+import com.example.cryptochallenge.di.DatabaseModule
+import com.example.cryptochallenge.di.NetworkModule
+import com.example.cryptochallenge.di.NetworkServiceModule
+import com.example.cryptochallenge.ui.mainFragment.MainViewModel
+import com.example.cryptochallenge.utils.*
 import com.example.cryptochallenge.utils.connectivity.FakeNetworkConfig
-import com.example.cryptochallenge.utils.toOrderEntityList
-import com.example.cryptochallenge.utils.toTickerEntity
-import io.reactivex.schedulers.TestScheduler
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import javax.inject.Inject
 
-class DetailActivityTest {
+@UninstallModules(DatabaseModule::class, NetworkServiceModule::class, NetworkModule::class)
+@HiltAndroidTest
+class DetailFragmentTest {
+
     @get:Rule
-    val dependencies =
-        DependenciesTestRule(InstrumentationRegistry.getInstrumentation().targetContext)
+    var hiltRule = HiltAndroidRule(this)
 
-    private val testScheduler: TestScheduler by lazy {
-        TestScheduler()
-    }
+    @Inject
+    lateinit var database: CryptoDatabase
 
     private val ticker: Ticker by lazy {
         Ticker(book, "1", "1", "1", "1", "1", "1", "1", "2016-04-08T17:52:31.000+00:00")
@@ -44,12 +46,17 @@ class DetailActivityTest {
 
     private val book = "btc_mxn"
 
+    @Before
+    fun setup() {
+        hiltRule.inject()
+    }
+
     @Test
     fun givenNoInternetAndNoLocalData_shouldShowNoInternetMsg() {
         FakeNetworkConfig.isThereInternet = false
         FakeNetworkConfig.emitValue = false
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         onView(withId(R.id.rvAsks))
             .check(matches(RecyclerViewMatcher.hasItemCount(0)))
@@ -72,7 +79,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         setOrderBookInDb(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         onView(withId(R.id.tvLastPriceVal))
             .check(matches(withText(ticker.last)))
@@ -104,7 +111,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         FakeNetworkServiceConfig.setOrderBook(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         onView(withId(R.id.tvLastPriceVal))
             .check(matches(withText(ticker.last)))
@@ -136,7 +143,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         FakeNetworkServiceConfig.setOrderBook(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         val newTicker = ticker.copy(last = "20")
         FakeNetworkServiceConfig.setTicker(newTicker)
@@ -179,7 +186,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         FakeNetworkServiceConfig.setOrderBook(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         FakeNetworkConfig.isThereInternet = false
         FakeNetworkConfig.emitValue = true
@@ -199,7 +206,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         FakeNetworkServiceConfig.setOrderBook(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         onView(withId(R.id.rvAsks))
             .check(matches(RecyclerViewMatcher.hasItemCount(0)))
@@ -228,7 +235,7 @@ class DetailActivityTest {
         val orderBook = OrderBook(listOf(order), listOf(order))
         FakeNetworkServiceConfig.setOrderBook(orderBook)
 
-        launch<DetailActivity>(getIntent())
+        launchFragmentInHiltContainer<DetailFragment>(getBundle())
 
         onView(withId(R.id.tvLastPriceVal))
             .check(matches(withText(ticker.last)))
@@ -246,29 +253,19 @@ class DetailActivityTest {
             .check(matches(isDisplayed()))
     }
 
-    private fun setTickerInDb(ticker: Ticker) {
-        dependencies.database.tickerDao().insert(ticker.toTickerEntity())
-            .subscribeOn(testScheduler)
-            .subscribe()
-
-        testScheduler.triggerActions()
+    private fun setTickerInDb(ticker: Ticker) = runBlocking {
+        database.tickerDao().insert(ticker.toTickerEntity())
     }
 
-    private fun setOrderBookInDb(orderBook: OrderBook) {
-        dependencies.database.orderBookDao().insertMany(
+    private fun setOrderBookInDb(orderBook: OrderBook) = runBlocking {
+        database.orderBookDao().insertMany(
             orderBook.bids.toOrderEntityList(OrderType.BIDS),
             orderBook.asks.toOrderEntityList(OrderType.ASKS)
         )
-            .subscribeOn(testScheduler)
-            .subscribe()
-
-        testScheduler.triggerActions()
     }
 
-    private fun getIntent(): Intent =
-        Intent(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            DetailActivity::class.java
-        )
-            .apply { putExtra(MainViewModel.INTENT_BOOK, book) }
+    private fun getBundle(): Bundle =
+        Bundle().apply {
+            putString(MainViewModel.INTENT_BOOK, book)
+        }
 }

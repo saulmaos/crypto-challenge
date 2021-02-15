@@ -1,6 +1,7 @@
-package com.example.cryptochallenge.ui.mainActivity
+package com.example.cryptochallenge.ui.mainFragment
 
 import androidx.annotation.StringRes
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +13,7 @@ import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 
-class MainViewModel(
+class MainViewModel @ViewModelInject constructor(
     private val booksRepository: BooksRepository,
     private val networkHelper: NetworkHelper,
     private val compositeDisposable: CompositeDisposable
@@ -25,7 +26,17 @@ class MainViewModel(
     private val _events = MutableLiveData<Event<MainNavigation>>()
     val events: LiveData<Event<MainNavigation>> = _events
 
+    private val _data = MutableLiveData<RequestResult>()
+    val data: LiveData<RequestResult> = _data
+
+    /*
+    * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
+    * `if (events.value != null)` is used to avoid calling it when config changes occur
+    * It's necessary to check manually for the internet connection status as explained
+    * in NetworkHelperImpl
+    */
     fun onInitialRequest() {
+        if (events.value != null) return
         networkHelper.observable()
             .subscribe(
                 { internetChange(it) },
@@ -55,7 +66,7 @@ class MainViewModel(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    _events.value = Event(MainNavigation.BooksList(it))
+                    _data.value = RequestResult.BooksList(it)
                     _events.value = Event(MainNavigation.HideBooksListLoading)
                 },
                 {
@@ -75,12 +86,12 @@ class MainViewModel(
             }
             .subscribe(
                 {
-                    if (it.isEmpty()) _events.value = Event(MainNavigation.NoDataFound)
-                    else _events.value = Event(MainNavigation.BooksList(it))
+                    if (it.isEmpty()) _data.value = RequestResult.NoDataFound
+                    else _data.value = RequestResult.BooksList(it)
                 },
                 {
                     it.printStackTrace()
-                    _events.value = Event(MainNavigation.NoDataFound)
+                    _data.value = RequestResult.NoDataFound
                 }
             )
             .let { compositeDisposable.add(it) }
@@ -95,10 +106,13 @@ class MainViewModel(
         compositeDisposable.clear()
     }
 
+    sealed class RequestResult {
+        data class BooksList(val books: List<Book>) : RequestResult()
+        object NoDataFound : RequestResult()
+    }
+
     sealed class MainNavigation {
-        data class BooksList(val books: List<Book>) : MainNavigation()
         data class Error(@StringRes val errorId: Int) : MainNavigation()
-        object NoDataFound : MainNavigation()
         object HideBooksListLoading : MainNavigation()
         object ShowBooksListLoading : MainNavigation()
     }

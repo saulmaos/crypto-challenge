@@ -5,8 +5,9 @@ import com.example.cryptochallenge.utils.connectivity.FakeNetworkConfig.isThereI
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class FakeNetworkHelper : NetworkHelper {
+class FakeNetworkHelper @Inject constructor() : NetworkHelper {
     private val observable: Observable<Boolean>
 
     init {

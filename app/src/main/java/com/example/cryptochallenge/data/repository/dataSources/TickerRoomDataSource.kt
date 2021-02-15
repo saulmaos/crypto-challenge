@@ -7,8 +7,9 @@ import com.example.cryptochallenge.utils.toTicker
 import com.example.cryptochallenge.utils.toTickerEntity
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class TickerRoomDataSource(
+class TickerRoomDataSource @Inject constructor(
     private val tickerDao: TickerDao
 ) : LocalTickerDataSource {
     override fun getTicker(book: String): Single<Ticker> {
@@ -17,8 +18,7 @@ class TickerRoomDataSource(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun insertTicker(ticker: Ticker): Single<Unit> {
-        return tickerDao.insert(ticker.toTickerEntity())
-            .subscribeOn(Schedulers.io())
+    override suspend fun insertTicker(ticker: Ticker) {
+        tickerDao.insert(ticker.toTickerEntity())
     }
 }

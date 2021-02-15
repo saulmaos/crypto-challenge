@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs.kotlin'
+    id 'dagger.hilt.android.plugin'
+    id 'org.jlleitschuh.gradle.ktlint'
 }
 
 android {
@@ -15,12 +18,25 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.example.cryptochallenge.CustomTestRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
+        }
+    }
+
+    ktlint {
+        reporters {
+            reporter "html"
+        }
+        version = "0.38.1"
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.test:monitor:${rootProject.androidxTestRunnerVersion}"
         }
     }
 
@@ -60,6 +76,8 @@ dependencies {
     implementation recyclerViewLib
     implementation swipeRefreshLayoutLib
     implementation fragmentKTXLib
+    implementation navigationFragmentLib
+    implementation navigationUILib
 
     //Material
     implementation materialLib
@@ -90,16 +108,31 @@ dependencies {
     implementation rxAndroidLib
     implementation rxJavaLib
 
+    // Coroutines
+    implementation coroutinesLib
+    implementation coroutinesAndroidLib
+
+    // Hilt
+    implementation hiltLib
+    kapt hiltCompiler
+    implementation hiltViewModelLib
+    kapt hiltViewModelCompiler
+
     // Testing
     testImplementation jUnitLib
     testImplementation mockitoLib
     testImplementation coreTestingLib
     testImplementation truthLib
     testImplementation liveDataTestingLib
+    testImplementation coroutinesTestLib
 
     // Android Testing
     androidTestImplementation testRunnerLib
     androidTestImplementation testJUnitLib
     androidTestImplementation coreTestingLib
     androidTestImplementation espressoLib
+    androidTestImplementation testHiltLib
+    kaptAndroidTest hiltCompiler
+    kaptAndroidTest hiltViewModelCompiler
+    debugImplementation fragmentTestLib
 }

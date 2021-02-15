@@ -3,7 +3,7 @@ package com.example.cryptochallenge.data.remote.response
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-data class PayloadTickerResponse (
+data class PayloadTickerResponse(
     @Expose
     @SerializedName("book")
     var book: String,

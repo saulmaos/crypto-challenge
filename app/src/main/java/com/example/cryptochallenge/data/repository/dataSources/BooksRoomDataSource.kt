@@ -8,8 +8,9 @@ import com.example.cryptochallenge.utils.toBookList
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
-class BooksRoomDataSource(
+class BooksRoomDataSource @Inject constructor(
     private val bookDao: BookDao
 ) : LocalBooksDataSource {
     override fun getAllBooks(): Maybe<List<Book>> {

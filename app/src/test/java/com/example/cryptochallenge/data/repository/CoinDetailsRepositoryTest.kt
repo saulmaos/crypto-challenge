@@ -8,6 +8,8 @@ import com.example.cryptochallenge.data.repository.dataSources.LocalTickerDataSo
 import com.example.cryptochallenge.data.repository.dataSources.RemoteOrderBookDataSource
 import com.example.cryptochallenge.data.repository.dataSources.RemoteTickerDataSource
 import io.reactivex.Single
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,10 +57,11 @@ class CoinDetailsRepositoryTest {
         )
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `test fetchTicker`() {
+    fun `test fetchTicker`() = runBlockingTest {
         `when`(remoteTickerDataSource.fetchTicker(book))
-            .thenReturn(Single.just(ticker))
+            .thenReturn(ticker)
 
         coinDetailsRepository.requestTicker(book)
 
@@ -75,20 +78,21 @@ class CoinDetailsRepositoryTest {
         verify(localTickerDataSource).getTicker(book)
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `test insertTicker`() {
-        `when`(localTickerDataSource.insertTicker(ticker))
-            .thenReturn(Single.just(Unit))
+    fun `test insertTicker`() = runBlockingTest {
+        `when`(localTickerDataSource.insertTicker(ticker)).thenReturn(Unit)
 
         coinDetailsRepository.saveTicker(ticker)
 
         verify(localTickerDataSource).insertTicker(ticker)
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `test fetchOrderBooks`() {
+    fun `test fetchOrderBooks`() = runBlockingTest {
         `when`(remoteOrderBookDataSource.fetchOrderBooks(book))
-            .thenReturn(Single.just(orderBook))
+            .thenReturn(orderBook)
 
         coinDetailsRepository.requestOrderBook(book)
 
@@ -105,20 +109,22 @@ class CoinDetailsRepositoryTest {
         verify(localOrderBookDataSource).getOrderBook(book)
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `test insertOrderBook`() {
+    fun `test insertOrderBook`() = runBlockingTest {
         `when`(localOrderBookDataSource.insertOrderBook(orderBook))
-            .thenReturn(Single.just(Unit))
+            .thenReturn(Unit)
 
         coinDetailsRepository.saveOrderBook(orderBook)
 
         verify(localOrderBookDataSource).insertOrderBook(orderBook)
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `test deleteOrderBookByBook`() {
+    fun `test deleteOrderBookByBook`() = runBlockingTest {
         `when`(localOrderBookDataSource.deleteOrderBookByBook(book))
-            .thenReturn(Single.just(Unit))
+            .thenReturn(Unit)
 
         coinDetailsRepository.deleteOrderBook(book)
 

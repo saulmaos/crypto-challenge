@@ -10,7 +10,7 @@ import io.reactivex.Single
 @Dao
 interface TickerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(ticker: TickerEntity): Single<Unit>
+    suspend fun insert(ticker: TickerEntity)
 
     @Query("SELECT * FROM ticker where book = :book")
     fun getTicker(book: String): Single<TickerEntity>

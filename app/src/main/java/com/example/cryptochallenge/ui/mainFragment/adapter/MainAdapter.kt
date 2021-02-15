@@ -1,4 +1,4 @@
-package com.example.cryptochallenge.ui.mainActivity.adapter
+package com.example.cryptochallenge.ui.mainFragment.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -28,7 +28,8 @@ class MainViewHolder private constructor(
     binding.root
 ) {
     constructor(parent: ViewGroup, listener: (book: Book) -> Unit) : this(
-        listener, ViewHolderBookBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        listener,
+        ViewHolderBookBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     )
 
     fun bind(book: Book) {

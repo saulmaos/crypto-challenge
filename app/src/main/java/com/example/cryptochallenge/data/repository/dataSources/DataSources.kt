@@ -16,20 +16,20 @@ interface LocalBooksDataSource {
 }
 
 interface RemoteTickerDataSource {
-    fun fetchTicker(book: String): Single<Ticker>
+    suspend fun fetchTicker(book: String): Ticker
 }
 
 interface LocalTickerDataSource {
     fun getTicker(book: String): Single<Ticker>
-    fun insertTicker(ticker: Ticker): Single<Unit>
+    suspend fun insertTicker(ticker: Ticker)
 }
 
 interface RemoteOrderBookDataSource {
-    fun fetchOrderBooks(book: String): Single<OrderBook>
+    suspend fun fetchOrderBooks(book: String): OrderBook
 }
 
 interface LocalOrderBookDataSource {
     fun getOrderBook(book: String): Single<OrderBook>
-    fun insertOrderBook(orderBook: OrderBook): Single<Unit>
-    fun deleteOrderBookByBook(book: String): Single<Unit>
+    suspend fun insertOrderBook(orderBook: OrderBook)
+    suspend fun deleteOrderBookByBook(book: String)
 }

@@ -1,4 +1,4 @@
-package com.example.cryptochallenge.ui.detailActivity.adapter
+package com.example.cryptochallenge.ui.detailFragment.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
