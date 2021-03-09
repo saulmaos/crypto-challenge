@@ -22,5 +22,8 @@
         <argument
             android:name="intent_book"
             app:argType="string" />
+        <argument
+            android:name="intent_dominant_colors"
+            app:argType="com.example.cryptochallenge.utils.DominantColors" />
     </fragment>
 </navigation>

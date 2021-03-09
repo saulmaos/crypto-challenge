@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.Color
 import androidx.fragment.app.FragmentActivity
 import com.example.cryptochallenge.R
 import com.example.cryptochallenge.data.local.entity.BookEntity
@@ -16,6 +17,7 @@ import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.remote.response.PayloadAvailableBookResponse
 import com.example.cryptochallenge.data.remote.response.PayloadOrderBookResponse
 import com.example.cryptochallenge.data.remote.response.PayloadTickerResponse
+import com.example.cryptochallenge.ui.theme.*
 import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 import java.text.DateFormat
@@ -49,7 +51,7 @@ fun List<BookEntity>.toBookList(): List<Book> = map {
         "",
         "",
         "",
-        createUrl(it.book)
+        createUrlByBook(it.book)
     )
 }
 
@@ -68,7 +70,7 @@ fun List<Order>.toOrderEntityList(orderType: OrderType): List<OrderEntity> = map
 }
 
 fun List<OrderEntity>.toOrderList(): List<Order> = map {
-    Order(it.book, it.price, it.price)
+    Order(it.book, it.price, it.amount)
 }
 
 fun PayloadAvailableBookResponse.toBook() =
@@ -80,7 +82,7 @@ fun PayloadAvailableBookResponse.toBook() =
         maximumPrice,
         minimumValue,
         maximumValue,
-        createUrl(book)
+        createUrlByBook(book)
     )
 
 fun PayloadTickerResponse.toTicker() =

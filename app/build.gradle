@@ -29,6 +29,7 @@ android {
 
     buildFeatures {
         compose true
+        viewBinding = true
     }
 
     ktlint {
@@ -64,30 +65,23 @@ android {
         useIR = true
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     composeOptions {
         kotlinCompilerVersion '1.4.30'
-        kotlinCompilerExtensionVersion '1.0.0-alpha12'
+        kotlinCompilerExtensionVersion "${rootProject.compose_version}"
     }
 }
 
 dependencies {
-    implementation 'androidx.compose.ui:ui:1.0.0-alpha12'
-    // Tooling support (Previews, etc.)
-    implementation 'androidx.compose.ui:ui-tooling:1.0.0-alpha12'
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation 'androidx.compose.foundation:foundation:1.0.0-alpha12'
-    // Material Design
-    implementation 'androidx.compose.material:material:1.0.0-alpha12'
-    // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.0.0-alpha12'
-    implementation 'androidx.compose.material:material-icons-extended:1.0.0-alpha12'
-    // Integration with observables
-    implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-alpha12'
-    implementation 'androidx.compose.runtime:runtime-rxjava2:1.0.0-alpha12'
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation "androidx.compose.foundation:foundation:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.material:material-icons-core:$compose_version"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    implementation "dev.chrisbanes.accompanist:accompanist-coil:0.5.1"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha02"
+    implementation "androidx.activity:activity-compose:1.3.0-alpha02"
+    implementation "androidx.palette:palette-ktx:1.0.0"
 
     //Kotlin
     implementation kotlinLib

@@ -1,6 +1,5 @@
 package com.example.cryptochallenge.ui.mainFragment
 
-import androidx.annotation.StringRes
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -23,8 +22,11 @@ class MainViewModel @ViewModelInject constructor(
         const val INTENT_BOOK = "intent_book"
     }
 
-    private val _events = MutableLiveData<Event<MainNavigation>>()
-    val events: LiveData<Event<MainNavigation>> = _events
+    private val _isLoading = MutableLiveData<Event<Boolean>>()
+    val isLoading: LiveData<Event<Boolean>> = _isLoading
+
+    private val _error = MutableLiveData<Event<Int>>()
+    val error: LiveData<Event<Int>> = _error
 
     private val _data = MutableLiveData<RequestResult>()
     val data: LiveData<RequestResult> = _data
@@ -36,25 +38,25 @@ class MainViewModel @ViewModelInject constructor(
     * in NetworkHelperImpl
     */
     fun onInitialRequest() {
-        if (events.value != null) return
+        if (data.value != null) return
         networkHelper.observable()
             .subscribe(
                 { internetChange(it) },
                 { it.printStackTrace() }
             ).let { compositeDisposable.add(it) }
         if (!networkHelper.isNetworkConnected()) {
-            _events.value = Event(MainNavigation.ShowBooksListLoading)
+            _isLoading.value = Event(true)
             requestLocalBooks()
         }
     }
 
     private fun internetChange(isConnected: Boolean) {
         if (isConnected) {
-            _events.value = Event(MainNavigation.ShowBooksListLoading)
+            _isLoading.value = Event(true)
             requestRemoteBooks()
         } else {
-            _events.value = Event(MainNavigation.Error(R.string.error_no_internet))
-            _events.value = Event(MainNavigation.HideBooksListLoading)
+            _error.value = Event(R.string.error_no_internet)
+            _isLoading.value = Event(false)
         }
     }
 
@@ -67,11 +69,11 @@ class MainViewModel @ViewModelInject constructor(
             .subscribe(
                 {
                     _data.value = RequestResult.BooksList(it)
-                    _events.value = Event(MainNavigation.HideBooksListLoading)
+                    _isLoading.value = Event(false)
                 },
                 {
                     it.printStackTrace()
-                    _events.value = Event(MainNavigation.Error(R.string.error_on_request_books))
+                    _error.value = Event(R.string.error_on_request_books)
                     requestLocalBooks()
                 }
             )
@@ -82,7 +84,7 @@ class MainViewModel @ViewModelInject constructor(
         booksRepository.getLocalBooks()
             .observeOn(AndroidSchedulers.mainThread())
             .doFinally {
-                _events.value = Event(MainNavigation.HideBooksListLoading)
+                _isLoading.value = Event(false)
             }
             .subscribe(
                 {
@@ -109,11 +111,5 @@ class MainViewModel @ViewModelInject constructor(
     sealed class RequestResult {
         data class BooksList(val books: List<Book>) : RequestResult()
         object NoDataFound : RequestResult()
-    }
-
-    sealed class MainNavigation {
-        data class Error(@StringRes val errorId: Int) : MainNavigation()
-        object HideBooksListLoading : MainNavigation()
-        object ShowBooksListLoading : MainNavigation()
     }
 }

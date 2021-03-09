@@ -24,8 +24,8 @@ class DetailViewModel @ViewModelInject constructor(
     private var tickerRequestFinished = false
     private var orderBookRequestFinished = false
 
-    private val _events = MutableLiveData<Event<DetailNavigation>>()
-    val events: LiveData<Event<DetailNavigation>> = _events
+//    private val _events = MutableLiveData<Event<DetailNavigation>>()
+//    val events: LiveData<Event<DetailNavigation>> = _events
 
     private val _pair = MutableLiveData<Pair<String, String>>()
     val pair: LiveData<Pair<String, String>> = _pair
@@ -36,13 +36,19 @@ class DetailViewModel @ViewModelInject constructor(
     private val _orderBook = MutableLiveData<OrderBook>()
     val orderBook: LiveData<OrderBook> = _orderBook
 
+    private val _isLoading = MutableLiveData<Event<Boolean>>()
+    val isLoading: LiveData<Event<Boolean>> = _isLoading
+
+    private val _error = MutableLiveData<Event<Int>>()
+    val error: LiveData<Event<Int>> = _error
+
     /*
     * onInitialRequest() will be called every time onViewCreated() (from mainFragment).
     * `if (events.value != null)` is used to avoid calling it when config changes occur
     * It's necessary to check manually for the internet connection status as explained
     * in NetworkHelperImpl
     */
-    fun onInitialRequest(book: String?) {
+    fun onInitialRequest(book: String) {
         if (pair.value != null) return
         networkHelper.observable()
             .subscribe(
@@ -50,32 +56,35 @@ class DetailViewModel @ViewModelInject constructor(
                 { it.printStackTrace() }
             ).let { compositeDisposable.add(it) }
 
-        book?.let {
+        book.let {
             val params = it.split("_")
             _pair.value = Pair(params[0], params[1])
             if (!networkHelper.isNetworkConnected()) {
-                _events.value = Event(DetailNavigation.ShowLoading)
+//                _events.value = Event(DetailNavigation.ShowLoading)
+                _isLoading.value = Event(true)
                 requestLocalTicker(it)
                 requestLocalOrderBook(it)
             }
         }
     }
 
-    fun onReloadPressed(book: String?) {
+    fun onReloadPressed(book: String) {
         requestData(networkHelper.isNetworkConnected(), book)
     }
 
-    private fun requestData(isConnected: Boolean, book: String?) {
+    private fun requestData(isConnected: Boolean, book: String) {
         tickerRequestFinished = false
         orderBookRequestFinished = false
         if (isConnected) {
-            book?.let {
-                _events.value = Event(DetailNavigation.ShowLoading)
+            book.let {
+//                _events.value = Event(DetailNavigation.ShowLoading)
+                _isLoading.value = Event(true)
                 requestRemoteTicker(it)
                 requestRemoteOrderBook(it)
             }
         } else {
-            _events.value = Event(DetailNavigation.Error(R.string.error_no_internet))
+//            _events.value = Event(DetailNavigation.Error(R.string.error_no_internet))
+            _error.value = Event(R.string.error_no_internet)
         }
     }
 
@@ -92,7 +101,8 @@ class DetailViewModel @ViewModelInject constructor(
             _orderBook.value = orderBook
             orderBookRequestFinished = true
             if (tickerRequestFinished && orderBookRequestFinished)
-                _events.value = Event(DetailNavigation.HideLoading)
+                _isLoading.value = Event(false)
+//                _events.value = Event(DetailNavigation.HideLoading)
         } catch (e: Exception) {
             e.printStackTrace()
             requestLocalOrderBook(book)
@@ -106,7 +116,7 @@ class DetailViewModel @ViewModelInject constructor(
             _ticker.value = ticker
             tickerRequestFinished = true
             if (tickerRequestFinished && orderBookRequestFinished)
-                _events.value = Event(DetailNavigation.HideLoading)
+                _isLoading.value = Event(false)
         } catch (e: Exception) {
             e.printStackTrace()
             requestLocalTicker(book)
@@ -119,17 +129,17 @@ class DetailViewModel @ViewModelInject constructor(
             .doFinally {
                 orderBookRequestFinished = true
                 if (tickerRequestFinished && orderBookRequestFinished)
-                    _events.value = Event(DetailNavigation.HideLoading)
+                    _isLoading.value = Event(false)
             }
             .subscribe(
                 {
-                    if (it.asks.isEmpty()) _events.value =
-                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+//                    if (it.asks.isEmpty()) _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
+                    if (it.asks.isEmpty()) _error.value = Event(R.string.error_on_request_data)
                     else _orderBook.value = it
                 },
                 {
-                    _events.value =
-                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+//                    _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
+                    _error.value = Event(R.string.error_on_request_data)
                 }
             ).let { compositeDisposable.add(it) }
     }
@@ -140,7 +150,7 @@ class DetailViewModel @ViewModelInject constructor(
             .doFinally {
                 tickerRequestFinished = true
                 if (tickerRequestFinished && orderBookRequestFinished)
-                    _events.value = Event(DetailNavigation.HideLoading)
+                    _isLoading.value = Event(false)
             }
             .subscribe(
                 {
@@ -149,8 +159,8 @@ class DetailViewModel @ViewModelInject constructor(
                 {
                     it.printStackTrace()
                     _ticker.value = Ticker.defaultTicker()
-                    _events.value =
-                        Event(DetailNavigation.Error(R.string.error_on_request_data))
+//                    _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
+                    _error.value = Event(R.string.error_on_request_data)
                 }
             ).let { compositeDisposable.add(it) }
     }

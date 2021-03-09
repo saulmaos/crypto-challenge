@@ -1,5 +1,7 @@
 package com.example.cryptochallenge.data.model
 
+import java.util.*
+
 data class Book(
     var book: String,
 
@@ -17,5 +19,5 @@ data class Book(
 
     var imageUrl: String,
 
-    var bookPretty: String = book.replace("_", "/")
+    var bookPretty: String = book.replace("_", "/").toUpperCase(Locale.getDefault())
 )

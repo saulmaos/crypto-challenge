@@ -6,4 +6,8 @@
     <dimen name="crypto_logo_size">50dp</dimen>
     <dimen name="separator_height">2dp</dimen>
     <dimen name="padding_small">8dp</dimen>
+    <dimen name="height_card_crypto_item">98dp</dimen>
+    <dimen name="appbar_height">56dp</dimen>
+    <dimen name="crypto_logo_size_big">150dp</dimen>
+    <dimen name="text_size_normal">15sp</dimen>
 </resources>
