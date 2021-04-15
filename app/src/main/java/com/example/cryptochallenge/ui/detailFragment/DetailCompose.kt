@@ -1,8 +1,8 @@
 package com.example.cryptochallenge.ui.detailFragment
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateValueAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,8 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +37,7 @@ import com.example.cryptochallenge.ui.theme.Ask
 import com.example.cryptochallenge.ui.theme.Bid
 import com.example.cryptochallenge.ui.theme.Btc
 import com.example.cryptochallenge.utils.DominantColors
+import com.example.cryptochallenge.utils.PriceChange
 import com.example.cryptochallenge.utils.createUrlByTicker
 import java.util.*
 
@@ -191,17 +191,31 @@ fun DetailAppBar(
                     }
                 )
             }
+
+            val textColor by animateColorAsState(
+                targetValue = dominantColors.onColor,
+                animationSpec = keyframes {
+                    durationMillis = 500
+                    val color = when (ticker.lastPriceChangedRegardingThePreviousOne) {
+                        PriceChange.CURRENT_IS_HIGHER -> Bid
+                        PriceChange.CURRENT_IS_LOWER -> Ask
+                        PriceChange.NO_CHANGE -> dominantColors.onColor
+                    }
+                    color at 100
+                    color at 300
+                }
+            )
             Row(Modifier.fillMaxWidth()) {
                 Text(
                     text = ticker.last,
                     style = MaterialTheme.typography.h3,
-                    color = dominantColors.onColor,
+                    color = textColor,
                     modifier = Modifier.alignByBaseline()
                 )
                 Text(
                     text = ticker.currency,
                     style = MaterialTheme.typography.h4,
-                    color = dominantColors.onColor,
+                    color = textColor,
                     modifier = Modifier.alignByBaseline()
                 )
             }

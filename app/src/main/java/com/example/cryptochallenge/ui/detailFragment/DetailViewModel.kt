@@ -11,6 +11,7 @@ import com.example.cryptochallenge.data.model.OrderBook
 import com.example.cryptochallenge.data.model.Ticker
 import com.example.cryptochallenge.data.repository.CoinDetailsRepository
 import com.example.cryptochallenge.utils.Event
+import com.example.cryptochallenge.utils.PriceChange
 import com.example.cryptochallenge.utils.connectivity.NetworkHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -23,9 +24,6 @@ class DetailViewModel @ViewModelInject constructor(
 ) : ViewModel() {
     private var tickerRequestFinished = false
     private var orderBookRequestFinished = false
-
-//    private val _events = MutableLiveData<Event<DetailNavigation>>()
-//    val events: LiveData<Event<DetailNavigation>> = _events
 
     private val _pair = MutableLiveData<Pair<String, String>>()
     val pair: LiveData<Pair<String, String>> = _pair
@@ -60,7 +58,6 @@ class DetailViewModel @ViewModelInject constructor(
             val params = it.split("_")
             _pair.value = Pair(params[0], params[1])
             if (!networkHelper.isNetworkConnected()) {
-//                _events.value = Event(DetailNavigation.ShowLoading)
                 _isLoading.value = Event(true)
                 requestLocalTicker(it)
                 requestLocalOrderBook(it)
@@ -77,13 +74,11 @@ class DetailViewModel @ViewModelInject constructor(
         orderBookRequestFinished = false
         if (isConnected) {
             book.let {
-//                _events.value = Event(DetailNavigation.ShowLoading)
                 _isLoading.value = Event(true)
                 requestRemoteTicker(it)
                 requestRemoteOrderBook(it)
             }
         } else {
-//            _events.value = Event(DetailNavigation.Error(R.string.error_no_internet))
             _error.value = Event(R.string.error_no_internet)
         }
     }
@@ -102,7 +97,6 @@ class DetailViewModel @ViewModelInject constructor(
             orderBookRequestFinished = true
             if (tickerRequestFinished && orderBookRequestFinished)
                 _isLoading.value = Event(false)
-//                _events.value = Event(DetailNavigation.HideLoading)
         } catch (e: Exception) {
             e.printStackTrace()
             requestLocalOrderBook(book)
@@ -112,6 +106,7 @@ class DetailViewModel @ViewModelInject constructor(
     private fun requestRemoteTicker(book: String) = viewModelScope.launch {
         try {
             val ticker: Ticker = coinDetailsRepository.requestTicker(book)
+            ticker.lastPriceChangedRegardingThePreviousOne = calculateIfThereIsAPriceChange(ticker)
             coinDetailsRepository.saveTicker(ticker)
             _ticker.value = ticker
             tickerRequestFinished = true
@@ -121,6 +116,19 @@ class DetailViewModel @ViewModelInject constructor(
             e.printStackTrace()
             requestLocalTicker(book)
         }
+    }
+
+    private fun calculateIfThereIsAPriceChange(currentTicker: Ticker): PriceChange {
+        return _ticker.value?.let {
+            val oldLastPrice = it.last.toDouble()
+            val currentLastPrice = currentTicker.last.toDouble()
+
+            when {
+                currentLastPrice > oldLastPrice -> PriceChange.CURRENT_IS_HIGHER
+                currentLastPrice < oldLastPrice -> PriceChange.CURRENT_IS_LOWER
+                else -> PriceChange.NO_CHANGE
+            }
+        } ?: PriceChange.NO_CHANGE
     }
 
     private fun requestLocalOrderBook(book: String) {
@@ -133,12 +141,10 @@ class DetailViewModel @ViewModelInject constructor(
             }
             .subscribe(
                 {
-//                    if (it.asks.isEmpty()) _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
                     if (it.asks.isEmpty()) _error.value = Event(R.string.error_on_request_data)
                     else _orderBook.value = it
                 },
                 {
-//                    _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
                     _error.value = Event(R.string.error_on_request_data)
                 }
             ).let { compositeDisposable.add(it) }
@@ -159,7 +165,6 @@ class DetailViewModel @ViewModelInject constructor(
                 {
                     it.printStackTrace()
                     _ticker.value = Ticker.defaultTicker()
-//                    _events.value = Event(DetailNavigation.Error(R.string.error_on_request_data))
                     _error.value = Event(R.string.error_on_request_data)
                 }
             ).let { compositeDisposable.add(it) }

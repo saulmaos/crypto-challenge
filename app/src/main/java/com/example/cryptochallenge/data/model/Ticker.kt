@@ -1,5 +1,6 @@
 package com.example.cryptochallenge.data.model
 
+import com.example.cryptochallenge.utils.PriceChange
 import java.util.Locale
 
 data class Ticker(
@@ -21,6 +22,8 @@ data class Ticker(
 
     var createdAt: String,
 
+    var lastPriceChangedRegardingThePreviousOne: PriceChange = PriceChange.NO_CHANGE,
+
     val currency: String = book.substring(book.indexOf("_") + 1).toUpperCase(Locale.ROOT)
 ) {
     companion object {
@@ -35,6 +38,7 @@ data class Ticker(
                 "N/A",
                 "N/A",
                 "N/A",
+                PriceChange.NO_CHANGE,
                 "",
             )
     }
